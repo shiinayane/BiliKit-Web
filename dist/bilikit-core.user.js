@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliKit Core
 // @namespace    https://github.com/shiinayane/BiliKit
-// @version      0.5.32
+// @version      0.5.33
 // @author       shiinayane
 // @description  B 站体验增强核心，一装到位：CDN 优选（救海外卡顿）· 免登录看评论/动态/1080p · 主题跟随系统深浅 · 评论显性别/IP 属地 · 播放不息屏——统一设置面板集中开关。Safari 友好、无需扩展、零外部依赖。
 // @license      MIT
@@ -2052,7 +2052,7 @@
       }
     })();
   }
-  const VERSION = "0.5.32";
+  const VERSION = "0.5.33";
   const DEFAULT_OPEN_MODE = "newtab";
   const NEW_TAB_HISTORY_FLATTEN_KEY = "feed.newTabHistoryFlatten";
   const DEFAULT_NEW_TAB_HISTORY_FLATTEN = false;
@@ -3617,6 +3617,79 @@
     params.fourk = "1";
     return { base, params };
   }
+  const AUTH_CACHE_KEY = "bilikit:no-login-auth";
+  const VALID_TTL_MS = 5 * 60 * 1e3;
+  function cookieValue(cookie, name) {
+    for (const part of cookie.split(";")) {
+      const item = part.trim();
+      const eq = item.indexOf("=");
+      if (eq < 0 || item.slice(0, eq) !== name) continue;
+      const value = item.slice(eq + 1);
+      return value || null;
+    }
+    return null;
+  }
+  function loginCookieFingerprint(cookie) {
+    const value = cookieValue(cookie, "DedeUserID__ckMd5");
+    return value ? md5(value) : null;
+  }
+  function readCachedStatus(storage, fingerprint, now) {
+    try {
+      const record = JSON.parse(storage.getItem(AUTH_CACHE_KEY) || "null");
+      if (!record || record.fingerprint !== fingerprint) return "unknown";
+      if (record.status === "invalid") return "invalid";
+      if (record.status === "valid" && now - record.checkedAt <= VALID_TTL_MS) return "valid";
+    } catch {
+    }
+    return "unknown";
+  }
+  function initialAuthAction(cookie, storage, now = Date.now()) {
+    const fingerprint = loginCookieFingerprint(cookie);
+    if (!fingerprint) return "activate-guest";
+    const cached = readCachedStatus(storage, fingerprint, now);
+    if (cached === "invalid") return "activate-guest";
+    if (cached === "valid") return "skip";
+    return "verify";
+  }
+  function loginStatusFromNav(json) {
+    var _a, _b;
+    if ((json == null ? void 0 : json.code) === 0 && ((_a = json == null ? void 0 : json.data) == null ? void 0 : _a.isLogin) === true) return "valid";
+    if (((json == null ? void 0 : json.code) === 0 || (json == null ? void 0 : json.code) === -101) && ((_b = json == null ? void 0 : json.data) == null ? void 0 : _b.isLogin) === false) return "invalid";
+    return "unknown";
+  }
+  async function verifyLogin(pureFetch, timeoutMs = 2500) {
+    const controller = new AbortController();
+    let timer;
+    const request = pureFetch("https://api.bilibili.com/x/web-interface/nav", {
+      credentials: "include",
+      cache: "no-store",
+      signal: controller.signal
+    }).then(async (response) => {
+      if (!response.ok) return "unknown";
+      return loginStatusFromNav(await response.json());
+    }).catch(() => "unknown");
+    const timeout = new Promise((resolve2) => {
+      timer = setTimeout(() => {
+        controller.abort();
+        resolve2("unknown");
+      }, timeoutMs);
+    });
+    try {
+      return await Promise.race([request, timeout]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+  function rememberVerifiedLogin(storage, fingerprint, status, now = Date.now()) {
+    if (status === "unknown") return "skip";
+    try {
+      const record = { fingerprint, status, checkedAt: now };
+      storage.setItem(AUTH_CACHE_KEY, JSON.stringify(record));
+      return status === "invalid" ? "reload" : "skip";
+    } catch {
+      return "skip";
+    }
+  }
   const AUTH_HOSTS = ["message.bilibili.com", "account.bilibili.com", "member.bilibili.com", "pay.bilibili.com", "big.bilibili.com"];
   const AUTH_PATHS = ["/history", "/watchlater", "/favlist", "/medialist", "/account", "/pincenter"];
   function needsRealLogin() {
@@ -3629,11 +3702,37 @@
     } catch {
     }
   }
+  function getSessionStorage() {
+    try {
+      return window.sessionStorage;
+    } catch {
+      return null;
+    }
+  }
   function init$1(_cfg) {
+    var _a;
     if (window.__BILIKIT_NO_LOGIN__) return;
     if (window.top !== window.self && !location.hash.includes("bk-drawer")) return;
     if (location.hostname === "passport.bilibili.com") return;
-    if (/DedeUserID__ckMd5=/.test(document.cookie)) return;
+    const fingerprint = loginCookieFingerprint(document.cookie);
+    const authStorage = fingerprint ? getSessionStorage() : null;
+    const authAction = fingerprint ? authStorage ? initialAuthAction(document.cookie, authStorage) : "skip" : "activate-guest";
+    if (authAction === "skip") return;
+    if (authAction === "verify") {
+      if (window.top !== window.self || window.__BILIKIT_NO_LOGIN_AUTH_CHECK__) return;
+      window.__BILIKIT_NO_LOGIN_AUTH_CHECK__ = true;
+      const pureFetch2 = (_a = window.fetch) == null ? void 0 : _a.bind(window);
+      if (!fingerprint || !authStorage || !pureFetch2) return;
+      void verifyLogin(pureFetch2).then((status) => {
+        if (loginCookieFingerprint(document.cookie) !== fingerprint) return;
+        if (rememberVerifiedLogin(authStorage, fingerprint, status) !== "reload") return;
+        try {
+          location.reload();
+        } catch {
+        }
+      });
+      return;
+    }
     if (needsRealLogin()) {
       clearFakeUid();
       return;
@@ -3750,9 +3849,9 @@
       {
         match: (u) => u.includes("/x/space/v2/myinfo"),
         rewriteResponse: (j) => {
-          var _a;
+          var _a2;
           try {
-            if ((j == null ? void 0 : j.code) === 0 && ((_a = j == null ? void 0 : j.data) == null ? void 0 : _a.profile)) return j;
+            if ((j == null ? void 0 : j.code) === 0 && ((_a2 = j == null ? void 0 : j.data) == null ? void 0 : _a2.profile)) return j;
           } catch {
           }
           return { code: 0, message: "0", ttl: 1, data: MOCK_MYINFO };
@@ -3762,9 +3861,9 @@
       {
         match: (u) => u.includes("/x/web-interface/nav"),
         rewriteResponse: (j) => {
-          var _a;
+          var _a2;
           try {
-            if ((_a = j == null ? void 0 : j.data) == null ? void 0 : _a.isLogin) return j;
+            if ((_a2 = j == null ? void 0 : j.data) == null ? void 0 : _a2.isLogin) return j;
             j.code = 0;
             j.message = "0";
             j.data = Object.assign({}, j.data, MOCK_USER);
@@ -3840,9 +3939,9 @@
       {
         match: (u) => u.includes("/ogv/player/playview"),
         rewriteResponse: (j) => {
-          var _a;
+          var _a2;
           try {
-            if ((_a = j == null ? void 0 : j.data) == null ? void 0 : _a.user_status) j.data.user_status.is_login = true;
+            if ((_a2 = j == null ? void 0 : j.data) == null ? void 0 : _a2.user_status) j.data.user_status.is_login = true;
           } catch {
           }
           return j;
@@ -4004,9 +4103,9 @@
     id: "no-login",
     name: "免登录",
     description: "未登录也能看评论 / 他人动态 / 1080p（装它即可替代 beefreely，避免脚本冲突）",
-    note: "开启后未登录也能：看视频/动态下方<b>评论</b>、看他人<b>动态</b>、看 <b>1080p</b> 视频。装了它就能卸载 beefreely 等免登录脚本，避免多个脚本抢改请求导致的时好时坏。<br><b>取舍（务必知悉）</b>：① 纯<b>只读</b>——页面「以为」你已登录（显示假账号），但发评论/点赞/投币/收藏/历史同步等需真鉴权的操作都会失败；② <b>看不到评论 IP 属地</b>——评论走匿名请求，B 站服务端只对真登录返回属地字段，免登录下拿不到（「评论信息」里的性别仍可显示）；③ 1080p 上限为官方<b>试看</b>，4K/HDR/大会员专享清晰度仍拿不到；④ 仅<b>未登录</b>时生效，检测到已登录会自动让路、不干扰真账号。<br><b>默认开启</b>：只在未登录时激活（已登录零影响），首次激活会在底部弹一次可关闭的提示。这样无痕/未登录浏览打开即 1080p，无需每次手动开。<br><b>想真正登录</b>：直接点顶栏用户菜单里的「退出登录」即可——会跳到登录页，登录后自动回到当前页面；免登录本身<b>不会被关掉</b>，下次未登录时照常自动生效。",
+    note: "开启后未登录也能：看视频/动态下方<b>评论</b>、看他人<b>动态</b>、看 <b>1080p</b> 视频。装了它就能卸载 beefreely 等免登录脚本，避免多个脚本抢改请求导致的时好时坏。<br><b>取舍（务必知悉）</b>：① 纯<b>只读</b>——页面「以为」你已登录（显示假账号），但发评论/点赞/投币/收藏/历史同步等需真鉴权的操作都会失败；② <b>看不到评论 IP 属地</b>——评论走匿名请求，B 站服务端只对真登录返回属地字段，免登录下拿不到（「评论信息」里的性别仍可显示）；③ 1080p 上限为官方<b>试看</b>，4K/HDR/大会员专享清晰度仍拿不到；④ 仅<b>未登录</b>时生效，检测到已登录会自动让路、不干扰真账号。<br>若浏览器残留了服务端已失效的登录状态，会自动确认并<b>刷新一次</b>后恢复免登录，不会清除你的 Cookie。<br><b>默认开启</b>：只在未登录时激活（已登录零影响），首次激活会在底部弹一次可关闭的提示。这样无痕/未登录浏览打开即 1080p，无需每次手动开。<br><b>想真正登录</b>：直接点顶栏用户菜单里的「退出登录」即可——会跳到登录页，登录后自动回到当前页面；免登录本身<b>不会被关掉</b>，下次未登录时照常自动生效。",
     category: "增强",
-    // 默认开：仅未登录时激活（已登录在 init 的 ckMd5 处即 return、零影响），首次激活弹一次性可关提示告知。
+    // 默认开：仅未登录时激活（真登录由 nav 确认后 return、零影响），首次激活弹一次性可关提示告知。
     // 目的：无痕模式存不住任何页面侧开关（localStorage/cookie 关窗即清、@grant none 无法用 GM 存储跨会话），
     // 唯一能让「无痕未登录时默认免登录」成立的就是把默认值设对；用一次性披露弹框换取透明、避免静默吓到人。
     defaultEnabled: true,

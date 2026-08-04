@@ -8,7 +8,18 @@
 
 ## 一、完整配方（逆向自 beefreely，实测可用）
 
-前提：**仅在「未登录」时动手**（`DedeUserID__ckMd5` cookie 不存在）；已登录一律不碰。仅顶层窗口；跳过 `passport`。
+前提：**仅在服务端确认未登录时动手**；已登录一律不碰。仅顶层窗口；跳过 `passport`。
+
+不能把 `DedeUserID__ckMd5` 是否存在直接等同于有效登录：Firefox 普通窗口可能残留服务端已失效的
+登录 cookie，导致 B 站按访客处理、而 BiliKit 误判成真登录后整体退出（issue #5）。现在采用三态判断：
+
+1. 没有 `DedeUserID__ckMd5`：立即进入访客快路径，不增加请求；
+2. 有标记且同一 cookie 已由 `/x/web-interface/nav` 确认真登录：短期缓存并完全让路；
+3. 有标记但 nav 明确返回 `isLogin:false`（无 Cookie 时 `code:0`，失效 Cookie 时通常 `code:-101`）：
+   把 cookie 摘要记入当前标签页的 `sessionStorage`，只刷新一次，
+   下一次 `document-start` 忽略该失效标记并及时安装 playinfo/fetch/XHR hook。
+
+网络失败、限流或异常响应均保持 `unknown` 并保守让路；不删除用户 cookie，也不刷新，避免误伤真账号。
 
 | 目的 | 手法 | 接口 / 位置 |
 |---|---|---|
@@ -56,7 +67,7 @@
 - **纯只读观看**：页面「以为」你登录（显示假账号 `bilibili`、6 级）。任何要真鉴权的动作（发评论、点赞、投币、历史同步）都会失败。
 - **1080p 上限**：`try_look` 给到 1080p（非大会员片源）；4K/HDR/大会员专享清晰度拿不到。
 - **假账号观感**：右上角会显示伪造用户（可后续美化/隐藏）。
-- **登录后自动让路**：检测到已登录（`DedeUserID__ckMd5`）即整体不启用，不干扰真登录。
+- **登录后自动让路**：`DedeUserID__ckMd5` 只作为候选标记，最终以 nav 的 `isLogin` 为准；真登录整体不启用。
 - **顺带修好 IP 属地**：评论走匿名真实响应（含 `reply_control.location`），`comment-location` 又能读到属地了。
 
 ## 六、分阶段实现

@@ -3,6 +3,12 @@ import { setModuleEnabled, get, set } from '../../core/settings'
 import { installNetHook, type NetRule } from './net-hook'
 import { signQuery, warmKeys, ensureKeys } from './wbi-core'
 import { playurlParams } from './playurl'
+import {
+  initialAuthAction,
+  loginCookieFingerprint,
+  rememberVerifiedLogin,
+  verifyLogin,
+} from './auth-state'
 
 /**
  * 免登录：未登录也能看评论 / 他人动态 / 1080p 视频——装它即可卸载 beefreely 等第三方脚本，
@@ -12,7 +18,7 @@ import { playurlParams } from './playurl'
  *  - reply 请求走匿名(credentials:'omit') → 放行公开评论；
  *  - playurl 塞 qn=80+try_look=1 重签 wbi + 置空预埋 __playinfo__ → 1080p；player/wbi/v2 改字段让 UI 认账。
  *
- * 侵入性 → 默认关，用户显式开启。仅「未登录」时生效：检测到已登录立即整体不启用，绝不干扰真登录。
+ * 侵入性 → 仅「未登录」时生效：登录标记交给 nav 确认，真登录整体不启用，绝不干扰真实账号。
  * 纯只读观看：任何要真鉴权的动作（发评论/点赞/投币/历史同步）都会失败；1080p 上限为 try_look（大会员专享清晰度拿不到）。
  */
 // 需要「真登录」的个人数据页：伪造登录会让它们拿假身份取不到数据、前后端状态打架 → 反复重刷。
@@ -28,18 +34,47 @@ function clearFakeUid(): void {
   try { if (/DedeUserID=/.test(document.cookie)) document.cookie = 'DedeUserID=; path=/; domain=.bilibili.com; max-age=0' } catch { /* ignore */ }
 }
 
+function getSessionStorage(): Storage | null {
+  try { return window.sessionStorage } catch { return null }
+}
+
 function init(_cfg: Cfg): void {
   if ((window as any).__BILIKIT_NO_LOGIN__) return
   // 顶层窗口总是生效；iframe 仅限我们自己的抽屉（bk-drawer 标记）——好让 Feed 抽屉里看视频也享免登录 1080p/评论。
   // 假 DedeUserID cookie 是 domain=.bilibili.com、顶层已种，抽屉 iframe 同域天然共享，无需重种。
   if (window.top !== window.self && !location.hash.includes('bk-drawer')) return
   if (location.hostname === 'passport.bilibili.com') return // 登录页不碰
-  if (/DedeUserID__ckMd5=/.test(document.cookie)) return // 已登录 → 整体不启用
+  // Cookie 只说明浏览器里留过登录标记，不等于服务端仍承认该会话（issue #5：普通窗口残留失效
+  // DedeUserID__ckMd5，隐私窗口/清站点数据正常）。无标记时继续走零开销访客快路径；有标记时先查
+  // sessionStorage 的服务端确认结果。真登录让路；已确认失效则忽略残留标记，立即进入访客模式。
+  const fingerprint = loginCookieFingerprint(document.cookie)
+  const authStorage = fingerprint ? getSessionStorage() : null
+  // 有疑似真登录标记却无法安全缓存验证结果时保守让路：否则无法保证失效恢复只刷新一次。
+  const authAction = fingerprint
+    ? (authStorage ? initialAuthAction(document.cookie, authStorage) : 'skip')
+    : 'activate-guest'
+  if (authAction === 'skip') return
+  if (authAction === 'verify') {
+    // 抽屉 iframe 不重复探测；顶层会确认并在失效时刷新，随后重建的 iframe 会直接读到缓存结论。
+    if (window.top !== window.self || (window as any).__BILIKIT_NO_LOGIN_AUTH_CHECK__) return
+    ;(window as any).__BILIKIT_NO_LOGIN_AUTH_CHECK__ = true
+    const pureFetch = window.fetch?.bind(window)
+    if (!fingerprint || !authStorage || !pureFetch) return
+    void verifyLogin(pureFetch).then((status) => {
+      // 探测期间用户可能刚完成登录/退出；cookie 已变化时丢弃旧请求结论。
+      if (loginCookieFingerprint(document.cookie) !== fingerprint) return
+      if (rememberVerifiedLogin(authStorage, fingerprint, status) !== 'reload') return
+      // 当前 Document 已错过 document-start 的 playinfo 拦截时机；可靠缓存后仅刷新一次，下一次启动
+      // 会直接进入访客模式。sessionStorage 写失败不会走到这里，因此不会形成刷新循环。
+      try { location.reload() } catch { /* ignore */ }
+    })
+    return
+  }
   // 个人数据页：不伪造，并清掉别处种下的假 cookie，让页面按未登录干净处理（跳登录/空列表），不重刷
   if (needsRealLogin()) { clearFakeUid(); return }
   ;(window as any).__BILIKIT_NO_LOGIN__ = true
 
-  // 免登录默认开、仅未登录时激活（已登录在上面 ckMd5 处已 return，走不到这）。首次真正激活时，底部弹**一次**
+  // 免登录默认开、仅未登录时激活（真登录已由上面的 nav 确认分支 return）。首次真正激活时，底部弹**一次**
   // 可关闭的知情提示——把「静默伪造登录态」变成「明确告知、想关一键关」。放在这（激活确认后）而非模块外层，
   // 保证已登录用户永远看不到；只在顶层窗口弹（抽屉 iframe 不重复）。
   showGuestNotice()
@@ -357,10 +392,11 @@ export const noLogin: BiliKitModule = {
     '② <b>看不到评论 IP 属地</b>——评论走匿名请求，B 站服务端只对真登录返回属地字段，免登录下拿不到（「评论信息」里的性别仍可显示）；' +
     '③ 1080p 上限为官方<b>试看</b>，4K/HDR/大会员专享清晰度仍拿不到；' +
     '④ 仅<b>未登录</b>时生效，检测到已登录会自动让路、不干扰真账号。<br>' +
+    '若浏览器残留了服务端已失效的登录状态，会自动确认并<b>刷新一次</b>后恢复免登录，不会清除你的 Cookie。<br>' +
     '<b>默认开启</b>：只在未登录时激活（已登录零影响），首次激活会在底部弹一次可关闭的提示。这样无痕/未登录浏览打开即 1080p，无需每次手动开。<br>' +
     '<b>想真正登录</b>：直接点顶栏用户菜单里的「退出登录」即可——会跳到登录页，登录后自动回到当前页面；免登录本身<b>不会被关掉</b>，下次未登录时照常自动生效。',
   category: '增强',
-  // 默认开：仅未登录时激活（已登录在 init 的 ckMd5 处即 return、零影响），首次激活弹一次性可关提示告知。
+  // 默认开：仅未登录时激活（真登录由 nav 确认后 return、零影响），首次激活弹一次性可关提示告知。
   // 目的：无痕模式存不住任何页面侧开关（localStorage/cookie 关窗即清、@grant none 无法用 GM 存储跨会话），
   // 唯一能让「无痕未登录时默认免登录」成立的就是把默认值设对；用一次性披露弹框换取透明、避免静默吓到人。
   defaultEnabled: true,
