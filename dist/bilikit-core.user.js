@@ -2889,6 +2889,9 @@
     ],
     init: init$5
   };
+  function rootBootstrapBackground(dark, readyState) {
+    return dark && readyState === "loading" ? "#18191c" : "";
+  }
   function init$4(cfg) {
     if (window.top !== window.self && !location.hash.includes("bk-drawer")) return;
     if (window.__BILIKIT_THEME_SYNC__) return;
@@ -2935,7 +2938,7 @@
       const root2 = document.documentElement;
       root2.classList.toggle("bili_dark", dark);
       root2.classList.toggle("night-mode", dark);
-      root2.style.backgroundColor = dark ? "#18191c" : "";
+      root2.style.backgroundColor = rootBootstrapBackground(dark, document.readyState);
       syncComponentTheme(dark);
     }
     apply();

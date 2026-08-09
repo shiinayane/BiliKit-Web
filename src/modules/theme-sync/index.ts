@@ -1,6 +1,10 @@
 import type { BiliKitModule, Cfg } from '../../core/module'
 import { SETTINGS_EVENT } from '../../core/settings'
 
+export function rootBootstrapBackground(dark: boolean, readyState: DocumentReadyState): string {
+  return dark && readyState === 'loading' ? '#18191c' : ''
+}
+
 /**
  * 主题同步：让 B 站跟随系统深浅色，全站无刷新实时切换并同步所有 Tab。
  * 迁移自 scripts/theme-sync.user.js（逻辑逐字保留）。
@@ -66,8 +70,9 @@ function init(cfg: Cfg): void {
     const root = document.documentElement
     root.classList.toggle('bili_dark', dark)
     root.classList.toggle('night-mode', dark)
-    // 整页加载首帧在主题表就绪前是白底，深色下「闪白」；document-start 给 <html> 垫深色底，首帧即深色。
-    root.style.backgroundColor = dark ? '#18191c' : ''
+    // 仅在主题表尚未就绪的加载阶段给 <html> 垫深色底，避免首帧闪白。DOMContentLoaded 后必须清掉：
+    // 新版个人空间把头图放在 z-index:-1，永久的不透明根背景会把它完全盖住（issue #6）。
+    root.style.backgroundColor = rootBootstrapBackground(dark, document.readyState)
     syncComponentTheme(dark) // 评论等组件的私有主题通道，单独同步
   }
 
