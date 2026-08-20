@@ -1,7 +1,7 @@
 import { isModuleEnabled, makeCfg } from './settings'
 
 /**
- * 一个 BiliKit 模块 = 原来一个独立 .user.js 的等价物。
+ * 一个 BiliKit-Web 模块 = 原来一个独立 .user.js 的等价物。
  * 迁移约定：把原脚本的 IIFE 主体搬进 init()，去掉 ==UserScript== 头与外层 IIFE，
  * 保留内部的单例守卫（与仍在用的旧独立脚本共存时防重复）。
  *
@@ -51,7 +51,7 @@ const registry: BiliKitModule[] = []
 export function register(...mods: BiliKitModule[]): void {
   for (const m of mods) {
     if (registry.some((x) => x.id === m.id)) {
-      console.warn(`[BiliKit] 模块 id 重复，已忽略：${m.id}`)
+      console.warn(`[BiliKit-Web] 模块 id 重复，已忽略：${m.id}`)
       continue
     }
     registry.push(m)
@@ -70,7 +70,7 @@ export function runAll(): void {
       try {
         m.init(makeCfg(m))
       } catch (e) {
-        console.error(`[BiliKit] 模块「${m.id}」初始化出错：`, e)
+        console.error(`[BiliKit-Web] 模块「${m.id}」初始化出错：`, e)
       }
     }
     if (m.runAt === 'idle' && document.readyState === 'loading') {

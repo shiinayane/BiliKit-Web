@@ -1,4 +1,4 @@
-# BiliKit 测试方案
+# BiliKit-Web 测试方案
 
 手动测试清单,覆盖 Float / Theme Sync / Wake Lock 三脚本及其协同。每条给出**步骤**与**理论应观察到的结果**;偏离即为缺陷。
 
@@ -87,7 +87,7 @@
 |6.4|连续开→关→开多次|每次正常;无历史堆积(后退一次即回到开抽屉前)|
 |6.5|在抽屉 iframe 内点一个相关视频|捕获阶段直接在同一个 iframe 中整页 `replace` 到新视频（`performance.timeOrigin` 变化），**不**先走 B 站 SPA、也不嵌套开新抽屉|
 |6.6|整个过程 Console|无红色报错|
-|6.7|管理器里只装一份 BiliKit·Float(删掉旧 `Bilibili-Float`)|点视频只开**一个**抽屉;即便误装两份，单例守卫(`window.__BILIKIT_FLOAT__`)让后注入者退出，仍建议删旧版|
+|6.7|管理器里只装一份 BiliKit-Web·Float(删掉旧 `Bilibili-Float`)|点视频只开**一个**抽屉;即便误装两份，单例守卫(`window.__BILIKIT_FLOAT__`)让后注入者退出，仍建议删旧版|
 
 ---
 
@@ -170,10 +170,10 @@
 |13.3|Safari 开启“左滑回到来源页”，从首页或 search/space 点视频|打开一个新视频标签；子页在 document-start 消费一次性标记，加载完成后 `window.name === ''`|
 |13.4|记下子标签初始 `history.length`，依次从相关推荐 SPA 打开视频 B、C|跨视频 `pushState` 被改成 `replaceState`，`history.length` 不增长；左下回程胶囊仍列出 A、B|
 |13.5|完成 13.4 后在 Safari 两指左滑返回|视频子标签由 Safari 原生关闭/返回来源标签，不触发脚本自制 wheel 手势|
-|13.6|开启实验项后用 `Cmd` 点击普通视频链接，或选择“当前页”打开|没有 BiliKit 一次性标记，保持浏览器/B站原生历史，不被压扁|
+|13.6|开启实验项后用 `Cmd` 点击普通视频链接，或选择“当前页”打开|没有 BiliKit-Web 一次性标记，保持浏览器/B站原生历史，不被压扁|
 |13.7|同一视频切换分 P，或命中一次真整页导航|这些边界保留原生历史；左滑可能先回退一层，文档说明不承诺立即关闭|
 |13.8|Chrome / Edge / Firefox 开启同一开关再打开视频|仍走 `noopener`，不修改视频页历史；开关只在 Safari 生效|
-|13.9|来源视频页已有“回程”记录时再用 BiliKit 打开子标签|来源标签的 `bilikit-wayback-stack` 原样保留；新标签不会继承出一组幽灵来时路|
+|13.9|来源视频页已有“回程”记录时再用 BiliKit-Web 打开子标签|来源标签的 `bilikit-wayback-stack` 原样保留；新标签不会继承出一组幽灵来时路|
 
 ---
 

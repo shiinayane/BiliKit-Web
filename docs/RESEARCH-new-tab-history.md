@@ -15,7 +15,7 @@
 
 - 未保存过打开方式时，默认使用“新标签页”；已有 `feed.openMode` 设置原样保留。
 - `feed.newTabHistoryFlatten` 是实验开关，默认关闭，仅 Safari 生效。
-- 开关只影响 BiliKit 自动打开的视频子标签；普通标签、手动修饰键打开、当前页和抽屉不受影响。
+- 开关只影响 BiliKit-Web 自动打开的视频子标签；普通标签、手动修饰键打开、当前页和抽屉不受影响。
 - Chrome、Edge、Firefox始终使用 `noopener`，不修改视频页 History。
 - 被压掉的跨视频来时路仍由“回程”胶囊保存在 `sessionStorage`；用户可点胶囊返回并续播。
 

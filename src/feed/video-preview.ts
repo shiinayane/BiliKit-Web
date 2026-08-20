@@ -69,7 +69,7 @@ export function setupVideoPreview(cover: HTMLElement, bvid: string, cid?: string
       }
     })
     video.addEventListener('error', () => {
-      if (mode === 'durl' && ci + 1 < cands.length) { console.warn(`[BiliKit Feed] durl 源#${ci} 失败，换下一个`); playDurl(ci + 1) }
+      if (mode === 'durl' && ci + 1 < cands.length) { console.warn(`[BiliKit-Web Feed] durl 源#${ci} 失败，换下一个`); playDurl(ci + 1) }
       else if (mode === 'durl') attemptOk = false // durl 候选全失败 → 别再走秒回放
     })
     cover.appendChild(video)
@@ -157,7 +157,7 @@ export function setupVideoPreview(cover: HTMLElement, bvid: string, cid?: string
         mode = 'mse'
         ok = await attachMse(video, dash)
         if (!hovering || !cover.isConnected) { teardown(); return }
-        if (ok) console.debug(`[BiliKit Feed] MSE 起播 ${(performance.now() - t0) | 0}ms ${bvid}`)
+        if (ok) console.debug(`[BiliKit-Web Feed] MSE 起播 ${(performance.now() - t0) | 0}ms ${bvid}`)
       }
       // 2) 回退 durl <video src>
       if (!ok) {

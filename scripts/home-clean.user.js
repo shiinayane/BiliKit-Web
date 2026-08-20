@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         BiliKit · 首页净化
-// @name:en      BiliKit · Home Clean
-// @namespace    https://github.com/shiinayane/BiliKit
+// @name         BiliKit-Web · 首页净化
+// @name:en      BiliKit-Web · Home Clean
+// @namespace    https://github.com/shiinayane/BiliKit-Web
 // @version      0.1.0
 // @description    净化 B 站首页视频流：去广告位 + 顶部 banner，按关键词/UP/播放量过滤，并回收屏外封面图的解码内存。轻量、Safari 友好，不重建首页、不碰 Vue 生命周期。
 // @description:en Clean up Bilibili's homepage feed: hide ad slots & top banner, filter by keyword/uploader/play-count, and recycle off-screen cover-image memory. Lightweight, Safari-friendly, no feed rebuild.

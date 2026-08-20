@@ -1,5 +1,5 @@
 #!/bin/bash
-# BiliKit · CDN 镜像吞吐测速
+# BiliKit-Web · CDN 镜像吞吐测速
 #
 # 配 scripts/cdn-pick.user.js 用：逐个 bilivideo 镜像下载同一段、比真实吞吐，
 # 挑最快的填进 cdn-pick 的 TARGET_HOST。延迟会骗人，必须测吞吐。

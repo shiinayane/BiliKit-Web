@@ -1,6 +1,6 @@
 # 免登录（看评论 / 动态 / 1080p）：机制与设计
 
-> 目标：BiliKit **自己**实现「免登录看评论 + 看他人动态 + 1080p 视频」，装了它就能**卸载 beefreely**，
+> 目标：BiliKit-Web **自己**实现「免登录看评论 + 看他人动态 + 1080p 视频」，装了它就能**卸载 beefreely**，
 > 从根上消掉「两个脚本抢 fetch/XHR」的竞态（见 issue #2）。落成 Core 新模块 `no-login`。
 >
 > 结论来自 2026-07 逆向 [vruses/beefreely](https://github.com/vruses/beefreely)（`@grant none`、`document-start`）
@@ -11,7 +11,7 @@
 前提：**仅在服务端确认未登录时动手**；已登录一律不碰。仅顶层窗口；跳过 `passport`。
 
 不能把 `DedeUserID__ckMd5` 是否存在直接等同于有效登录：Firefox 普通窗口可能残留服务端已失效的
-登录 cookie，导致 B 站按访客处理、而 BiliKit 误判成真登录后整体退出（issue #5）。现在采用三态判断：
+登录 cookie，导致 B 站按访客处理、而 BiliKit-Web 误判成真登录后整体退出（issue #5）。现在采用三态判断：
 
 1. 没有 `DedeUserID__ckMd5`：立即进入访客快路径，不增加请求；
 2. 有标记且同一 cookie 已由 `/x/web-interface/nav` 确认真登录：短期缓存并完全让路；

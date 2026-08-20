@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         BiliKit · 主题同步
-// @name:en      BiliKit · Theme Sync
-// @namespace    https://github.com/shiinayane/BiliKit
+// @name         BiliKit-Web · 主题同步
+// @name:en      BiliKit-Web · Theme Sync
+// @namespace    https://github.com/shiinayane/BiliKit-Web
 // @version      0.4.9
-// @description    ⚠️【已废弃·功能并入 BiliKit Core，请改装 Core】让 B 站跟随系统深浅色，全站无刷新实时切换并同步所有 Tab。
+// @description    ⚠️【已废弃·功能并入 BiliKit-Web Core，请改装 Core】让 B 站跟随系统深浅色，全站无刷新实时切换并同步所有 Tab。
 // @description:en Make Bilibili follow the system light/dark theme, switching live across the whole site with no reload and syncing every tab.
 // @author       shiinayane
 // @match        *://*.bilibili.com/*
@@ -15,9 +15,9 @@
 // ==/UserScript==
 
 /*
- * ⚠️ 已并入 BiliKit Core，建议迁移：本功能已整合进新脚本 BiliKit Core
+ * ⚠️ 已并入 BiliKit-Web Core，建议迁移：本功能已整合进新脚本 BiliKit-Web Core
  * （CDN 优选 + 主题同步 + 评论属地 + 防睡眠 + 统一设置面板），后续更新只在新脚本进行。
- * 安装：https://greasyfork.org/scripts?q=BiliKit
+ * 安装：https://greasyfork.org/scripts?q=BiliKit-Web
  * 装新版后可卸载本脚本；二者有单例守卫，短期并存不冲突。
  */
 
@@ -36,7 +36,7 @@
 (() => {
   'use strict';
 
-  // 【已并入 BiliKit Core】检测到 Core 在运行则提示本独立脚本可卸载（一次性、可关闭；不影响本脚本功能）。
+  // 【已并入 BiliKit-Web Core】检测到 Core 在运行则提示本独立脚本可卸载（一次性、可关闭；不影响本脚本功能）。
   if (window.top === window.self) setTimeout(() => {
     try {
       if (Date.now() - (Number(localStorage.getItem('bilikit:alive.core')) || 0) > 15000) return;
@@ -44,7 +44,7 @@
       if (localStorage.getItem(K)) return;
       const b = document.createElement('div');
       b.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:2147483600;max-width:300px;padding:10px 34px 10px 14px;border-radius:10px;background:rgba(22,23,28,.96);color:#e3e5e7;font:13px/1.5 -apple-system,"PingFang SC",sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4)';
-      b.innerHTML = '「主题同步」已并入 <b style="color:#fb7299">BiliKit Core</b>，本独立脚本可卸载。<a href="https://github.com/shiinayane/BiliKit" target="_blank" rel="noopener" style="color:#fb7299;text-decoration:none">详情</a>';
+      b.innerHTML = '「主题同步」已并入 <b style="color:#fb7299">BiliKit-Web Core</b>，本独立脚本可卸载。<a href="https://github.com/shiinayane/BiliKit-Web" target="_blank" rel="noopener" style="color:#fb7299;text-decoration:none">详情</a>';
       const x = document.createElement('span');
       x.textContent = '✕';
       x.style.cssText = 'position:absolute;top:7px;right:11px;cursor:pointer;opacity:.55';
@@ -54,7 +54,7 @@
     } catch (e) {}
   }, 2500);
 
-  // 仅在顶层窗口运行：避免跑进 BiliKit·Float 的抽屉 iframe（其主题由 Float 自行处理）。
+  // 仅在顶层窗口运行：避免跑进 BiliKit-Web·Float 的抽屉 iframe（其主题由 Float 自行处理）。
   if (window.top !== window.self) return;
 
   // 单例守卫：防止脚本被重复安装/注入导致重复设 cookie / 重复换肤。

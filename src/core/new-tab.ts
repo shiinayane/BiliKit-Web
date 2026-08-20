@@ -35,7 +35,7 @@ export function isHistoryFlattenTargetName(name: string): boolean {
 }
 
 /**
- * 只在由 BiliKit 自动打开的 Safari 视频标签上留下一个一次性 window.name 标记。
+ * 只在由 BiliKit-Web 自动打开的 Safari 视频标签上留下一个一次性 window.name 标记。
  *
  * 历史压扁需要保留 opener，才能使用 Safari 的原生左滑关闭行为；普通新标签仍坚持 noopener。
  * 打开前临时摘掉回程栈，避免 Safari 把来源标签的 sessionStorage 克隆进子标签。

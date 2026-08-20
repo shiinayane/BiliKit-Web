@@ -25,7 +25,7 @@ B 站当前并不存在一个能从首页直接调用的全局视频 SPA 入口�
 - 是否已经耗尽；
 - `scrollY`。
 
-返回首页并成功找到原生 Feed 容器后，BiliKit 一次性消费这份快照，先用已有卡片重建窗口化列表，再恢复滚动位置；触底时从保存的游标继续加载。快照只保存 JSON，不保存 DOM、iframe、Vue 实例、observer、MSE、video 或 object URL。
+返回首页并成功找到原生 Feed 容器后，BiliKit-Web 一次性消费这份快照，先用已有卡片重建窗口化列表，再恢复滚动位置；触底时从保存的游标继续加载。快照只保存 JSON，不保存 DOM、iframe、Vue 实例、observer、MSE、video 或 object URL。
 
 这提供的是“状态连续”，不是伪装成 SPA：
 

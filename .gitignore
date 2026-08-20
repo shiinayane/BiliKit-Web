@@ -6,12 +6,12 @@
 .idea/
 node_modules/
 
-# 构建产物入库（BiliKit Core/Feed 打包输出）：GreasyFork 的「同步」功能从
+# 构建产物入库（BiliKit-Web Core/Feed 打包输出）：GreasyFork 的「同步」功能从
 # raw.githubusercontent.com 定时拉取这里的 .user.js 自动发新版，故不再忽略。
 
-# 参考项目（外部仓库克隆，非 BiliKit 一部分，不纳入版本库）
+# 参考项目（外部仓库克隆，非 BiliKit-Web 一部分，不纳入版本库）
 references/
 urls.txt
 
-# 草稿 / 临时（第三方脚本、DOM dump 等，非 BiliKit 一部分）
+# 草稿 / 临时（第三方脚本、DOM dump 等，非 BiliKit-Web 一部分）
 temp/

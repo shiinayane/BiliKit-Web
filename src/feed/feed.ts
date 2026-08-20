@@ -254,7 +254,7 @@ async function loadMore(): Promise<void> {
         ? await fetchWebFeed(webFreshIdx++)
         : await fetchAppFeed(getAccessKey())
       if (gen !== feedGen) return // 期间发生了重新接管/刷新，本次已过期，交给新一轮（finally 不清新代的状态）
-      if (code !== 0) { console.warn(`[BiliKit Feed] 加载失败 code=${code} ${message}`); failed = true; break }
+      if (code !== 0) { console.warn(`[BiliKit-Web Feed] 加载失败 code=${code} ${message}`); failed = true; break }
       clearSkeletons() // 拿到数据后立刻撤骨架：否则骨架占位高度会撑出哨兵，导致填充循环提前退出
       removeTip() // 有新数据 → 撤掉上一次的「失败/刷完」提示
       // 新卡去重后推入 items（数据真源），再 render() 落成节点（P1 全量）
@@ -282,7 +282,7 @@ async function loadMore(): Promise<void> {
       }
     }
   } catch (e) {
-    console.error('[BiliKit Feed] 加载出错：', e)
+    console.error('[BiliKit-Web Feed] 加载出错：', e)
     failed = true
   } finally {
     if (gen === feedGen) {
@@ -444,7 +444,7 @@ function takeover(): boolean {
   return true
 }
 
-const REPO = 'https://github.com/shiinayane/BiliKit'
+const REPO = 'https://github.com/shiinayane/BiliKit-Web'
 
 // 未检测到 Core → 顶部插一条可关闭提示条（登录/设置/抽屉净化都靠 Core）。记住关闭，不再骚扰。
 function warnCoreMissing(): void {
@@ -453,7 +453,7 @@ function warnCoreMissing(): void {
   const bar = document.createElement('div')
   bar.className = `${NS}-warn`
   bar.innerHTML =
-    `<span>未检测到 <b>BiliKit Core</b>：登录、设置、抽屉净化都需要它。</span>` +
+    `<span>未检测到 <b>BiliKit-Web Core</b>：登录、设置、抽屉净化都需要它。</span>` +
     `<a href="${REPO}" target="_blank" rel="noopener">前往安装</a>` +
     `<button class="bk-x" aria-label="关闭">✕</button>`
   bar.querySelector('.bk-x')!.addEventListener('click', () => {

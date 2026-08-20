@@ -357,7 +357,7 @@ function renderNav(): void {
   }
   // 「关于」永远置于最末，自成一组
   navEl.appendChild(el('div', 'nav-cat', ABOUT_CAT))
-  navEl.appendChild(navItemSpecial(ABOUT_ID, '关于 BiliKit'))
+  navEl.appendChild(navItemSpecial(ABOUT_ID, '关于 BiliKit-Web'))
 }
 
 /* ------------------------------------------------------------------ *
@@ -366,12 +366,12 @@ function renderNav(): void {
 function renderFeedDetail(d: HTMLElement): void {
   const loggedIn = !!get<string>('feed.accessKey', '')
   d.appendChild(el('div', 'detail-title', 'App 推荐 Feed'))
-  d.appendChild(el('div', 'detail-desc', '首页换成手机 App 的推荐流（需另装 BiliKit Feed 脚本）'))
+  d.appendChild(el('div', 'detail-desc', '首页换成手机 App 的推荐流（需另装 BiliKit-Web Feed 脚本）'))
   // 在首页却探不到 Feed 心跳 → 提示未安装（仅首页判定：Feed 只在首页运行）
   const onHome = location.pathname === '/' || location.pathname === '/index.html'
   const feedAlive = Number(localStorage.getItem('bilikit:alive.feed') || 0)
   if (onHome && Date.now() - feedAlive > 8000) {
-    d.appendChild(callout('未检测到 <b>BiliKit Feed</b>，首页推荐流需要它。<a href="https://github.com/shiinayane/BiliKit" target="_blank" rel="noopener">前往安装</a>', 'warn'))
+    d.appendChild(callout('未检测到 <b>BiliKit-Web Feed</b>，首页推荐流需要它。<a href="https://github.com/shiinayane/BiliKit-Web" target="_blank" rel="noopener">前往安装</a>', 'warn'))
   }
   const fields = el('div', 'fields')
 
@@ -391,7 +391,7 @@ function renderFeedDetail(d: HTMLElement): void {
       setStatus('正在拉起二维码…')
       startTvLogin((accessKey) => {
         // 落盘失败（隐私模式/存储超限）时明确报错——否则「登录成功」但刷新后仍匿名，静默误导
-        if (!set('feed.accessKey', accessKey)) console.error('[BiliKit] access_key 持久化失败：刷新后可能仍为匿名（浏览器隐私模式或存储已满）。')
+        if (!set('feed.accessKey', accessKey)) console.error('[BiliKit-Web] access_key 持久化失败：刷新后可能仍为匿名（浏览器隐私模式或存储已满）。')
       })
     }
   })
@@ -425,7 +425,7 @@ function renderOpenDetail(d: HTMLElement): void {
   immRow.append(immHead, el('div', 'hint', '开：等播放器铺满后再显示，看不到从普通页切到全屏的过程（加载稍久一点）。关：先显示、再当场铺满，会瞥见这下切换。'))
   fields.appendChild(immRow)
 
-  // Safari 新标签专属：只压扁 BiliKit 自动打开的子标签中的跨视频 SPA 历史。
+  // Safari 新标签专属：只压扁 BiliKit-Web 自动打开的子标签中的跨视频 SPA 历史。
   // 普通标签、当前页和抽屉不带一次性 window.name 标记，永远不会受这个开关影响。
   const flattenRow = el('div', 'field')
   const flattenHead = el('div', 'toggle-head')
@@ -480,7 +480,7 @@ function renderPreviewDetail(d: HTMLElement): void {
 
 // 关于：版本号 + 仓库 / 反馈 / GreasyFork 链接（新标签打开）
 function renderAboutDetail(d: HTMLElement): void {
-  d.appendChild(el('div', 'detail-title', '关于 BiliKit'))
+  d.appendChild(el('div', 'detail-title', '关于 BiliKit-Web'))
   d.appendChild(el('div', 'detail-desc', 'B 站体验增强套件 · Safari 友好、无需扩展、零外部依赖 · 作者 shiinayane · MIT'))
   const fields = el('div', 'fields')
 
@@ -502,8 +502,8 @@ function renderAboutDetail(d: HTMLElement): void {
   fields.appendChild(frow)
 
   fields.appendChild(callout(
-    '<a href="https://github.com/shiinayane/BiliKit" target="_blank" rel="noopener">GitHub 仓库</a> · ' +
-    '<a href="https://github.com/shiinayane/BiliKit/issues" target="_blank" rel="noopener">反馈 / 报 Bug</a> · ' +
+    '<a href="https://github.com/shiinayane/BiliKit-Web" target="_blank" rel="noopener">GitHub 仓库</a> · ' +
+    '<a href="https://github.com/shiinayane/BiliKit-Web/issues" target="_blank" rel="noopener">反馈 / 报 Bug</a> · ' +
     '<a href="https://greasyfork.org/zh-CN/scripts/585248-bilikit-core" target="_blank" rel="noopener">GreasyFork 主页</a>',
   ))
   fields.appendChild(callout('<b>开发期 · 快速迭代中</b>：功能可能随时调整，偶有不稳定属正常；B 站接口一变也可能短暂失效。欢迎提 Issue 或建议。', 'warn'))
@@ -560,14 +560,14 @@ export function mountPanel(): void {
   sr.innerHTML = `<style>${STYLE}</style>`
 
   const gear = el('div', 'gear')
-  gear.title = 'BiliKit 设置'
+  gear.title = 'BiliKit-Web 设置'
   gear.innerHTML = GEAR_SVG
 
   const overlay = el('div', 'overlay')
   const card = el('div', 'card')
 
   const head = el('div', 'head')
-  head.innerHTML = `<span class="title"><span class="brand">BiliKit</span> 设置</span>`
+  head.innerHTML = `<span class="title"><span class="brand">BiliKit-Web</span> 设置</span>`
   const close = el('span', 'close', '×')
   head.appendChild(close)
 
@@ -616,8 +616,8 @@ export function mountPanel(): void {
       if (!fab.querySelector('.bk-settings')) {
         const b = document.createElement('button')
         b.className = 'bk-settings'
-        b.title = 'BiliKit 设置'
-        b.setAttribute('aria-label', 'BiliKit 设置')
+        b.title = 'BiliKit-Web 设置'
+        b.setAttribute('aria-label', 'BiliKit-Web 设置')
         b.innerHTML = FAB_GEAR
         b.addEventListener('click', open)
         fab.insertBefore(b, fab.querySelector('.bk-refresh')) // 置于刷新之上：返回顶部 / 设置 / 刷新

@@ -95,7 +95,7 @@ function appendWait(sb: any, buf: ArrayBuffer, signal: AbortSignal): Promise<voi
  */
 export function attachMse(video: HTMLVideoElement, dash: DashPreview): Promise<boolean> {
   const MS = MS_CTOR()
-  if (!MS) { console.debug('[BiliKit Feed] MSE 不可用：无 MediaSource'); return Promise.resolve(false) }
+  if (!MS) { console.debug('[BiliKit-Web Feed] MSE 不可用：无 MediaSource'); return Promise.resolve(false) }
   return new Promise<boolean>((resolve) => {
     let settled = false, dead = false, objUrl = ''
     let ms: any = null, sb: any = null
@@ -105,7 +105,7 @@ export function attachMse(video: HTMLVideoElement, dash: DashPreview): Promise<b
     const pumpListeners: Array<[string, EventListener]> = []
 
     const onPlaying = () => finish(true)
-    const onVidErr = () => console.debug('[BiliKit Feed] MSE video error code=', video.error && video.error.code)
+    const onVidErr = () => console.debug('[BiliKit-Web Feed] MSE video error code=', video.error && video.error.code)
     video.addEventListener('playing', onPlaying)
     video.addEventListener('error', onVidErr, { once: true })
 
@@ -187,7 +187,7 @@ export function attachMse(video: HTMLVideoElement, dash: DashPreview): Promise<b
                 fi += n; fetched += data.byteLength // 再推进游标（append 失败不越过未喂的 fragment）
               } catch (e) {
                 if (dead) return
-                console.debug('[BiliKit Feed] MSE 补拉失败：', (e as Error)?.message) // 已缓冲部分仍可播/loop
+                console.debug('[BiliKit-Web Feed] MSE 补拉失败：', (e as Error)?.message) // 已缓冲部分仍可播/loop
                 ended = true; safeEnd()
               } finally { pumping = false }
               if (!dead && !doneAll() && ahead() < LOW_WATER) void pump()
@@ -203,16 +203,16 @@ export function attachMse(video: HTMLVideoElement, dash: DashPreview): Promise<b
             await pump() // 首批
           }
           if (dead) return
-          video.play().catch((e) => console.debug('[BiliKit Feed] MSE play() rej', (e as Error)?.name))
-          playWatch = setTimeout(() => { console.debug('[BiliKit Feed] MSE 起播看门狗超时 rs=', video.readyState); finish(false) }, PLAY_WATCH)
+          video.play().catch((e) => console.debug('[BiliKit-Web Feed] MSE play() rej', (e as Error)?.name))
+          playWatch = setTimeout(() => { console.debug('[BiliKit-Web Feed] MSE 起播看门狗超时 rs=', video.readyState); finish(false) }, PLAY_WATCH)
         } catch (e) {
           if (dead) return
-          console.debug('[BiliKit Feed] MSE 装载失败：', (e as Error)?.message || e)
+          console.debug('[BiliKit-Web Feed] MSE 装载失败：', (e as Error)?.message || e)
           finish(false)
         }
       }, { once: true })
     } catch (e) {
-      console.debug('[BiliKit Feed] MSE 初始化失败：', (e as Error)?.message || e)
+      console.debug('[BiliKit-Web Feed] MSE 初始化失败：', (e as Error)?.message || e)
       finish(false)
     }
   })

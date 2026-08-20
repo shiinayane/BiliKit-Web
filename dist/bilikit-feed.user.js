@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name         BiliKit Feed
-// @namespace    https://github.com/shiinayane/BiliKit
+// @name         BiliKit-Web Feed
+// @namespace    https://github.com/shiinayane/BiliKit-Web
 // @version      0.3.23
 // @author       shiinayane
-// @description  B 站首页换成手机 App 的个性化推荐流。零框架纯原生实现（无 React/Vue、gzip 约 29KB）+ 窗口化虚拟化，约束 DOM、封面与预览媒体的常驻资源。视频默认开新标签页，也可选当前页或底部抽屉；封面悬停「真视频」秒开预览（MSE，接近原生 App）。需配合 BiliKit Core（登录 / 设置）。
+// @description  B 站首页换成手机 App 的个性化推荐流。零框架纯原生实现（无 React/Vue、gzip 约 30KB）+ 窗口化虚拟化，约束 DOM、封面与预览媒体的常驻资源。视频默认开新标签页，也可选当前页或底部抽屉；封面悬停「真视频」秒开预览（MSE，接近原生 App）。需配合 BiliKit-Web Core（登录 / 设置）。
 // @license      MIT
-// @icon         data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22116%22%20fill%3D%22%23FB7299%22%2F%3E%3Cg%20stroke%3D%22%23fff%22%20stroke-width%3D%2226%22%20stroke-linecap%3D%22round%22%3E%3Cline%20x1%3D%22212%22%20y1%3D%22182%22%20x2%3D%22166%22%20y2%3D%22104%22%2F%3E%3Cline%20x1%3D%22300%22%20y1%3D%22182%22%20x2%3D%22346%22%20y2%3D%22104%22%2F%3E%3C%2Fg%3E%3Crect%20x%3D%22108%22%20y%3D%22176%22%20width%3D%22296%22%20height%3D%22236%22%20rx%3D%2254%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M234%20258%20302%20294%20234%20330Z%22%20fill%3D%22%2300AEEC%22%20stroke%3D%22%2300AEEC%22%20stroke-width%3D%2218%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E
+// @icon         data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201024%22%3E%3Cpath%20d%3D%22M811.331%20691.122L562.396%20442.188C534.678%20414.47%20485.299%20418.91%20452.104%20452.104C418.909%20485.299%20414.47%20534.678%20442.188%20562.396L691.122%20811.331C718.841%20839.049%20768.22%20834.609%20801.415%20801.415C834.609%20768.22%20839.049%20718.841%20811.331%20691.122Z%22%20fill%3D%22%23FF607A%22%2F%3E%3Cpath%20d%3D%22M691.122%20213.188L442.188%20462.122C414.47%20489.841%20418.91%20539.22%20452.104%20572.415C485.299%20605.609%20534.678%20610.049%20562.396%20582.331L811.331%20333.396C839.049%20305.678%20834.609%20256.299%20801.415%20223.104C768.22%20189.909%20718.841%20185.47%20691.122%20213.188Z%22%20fill%3D%22%23FF607A%22%2F%3E%3Cpath%20d%3D%22M254.292%20221C215.57%20221%20185%20251%20185%20289V735C185%20773%20215.57%20803%20254.292%20803C274.672%20803%20293.014%20796%20308.299%20783L570.183%20568C599.734%20542%20614%20525%20614%20512C614%20499%20599.734%20482%20570.183%20456L308.299%20241C293.014%20225%20274.672%20221%20254.292%20221Z%22%20fill%3D%22%23195CFF%22%2F%3E%3C%2Fsvg%3E
 // @match        *://www.bilibili.com/
 // @match        *://www.bilibili.com/?*
 // @match        *://www.bilibili.com/index.html*
@@ -366,7 +366,7 @@
           const t = r.responseText || "";
           if (t.trimStart().startsWith("<")) {
             console.error(
-              "[BiliKit Feed] 非 JSON 响应（可能被风控/登录拦截）：",
+              "[BiliKit-Web Feed] 非 JSON 响应（可能被风控/登录拦截）：",
               "status =",
               r.status,
               r.statusText,
@@ -379,7 +379,7 @@
           resolve(t);
         },
         onerror: (r) => {
-          console.error("[BiliKit Feed] onerror：", r && r.status);
+          console.error("[BiliKit-Web Feed] onerror：", r && r.status);
           reject(new Error("网络错误"));
         },
         ontimeout: () => reject(new Error("请求超时")),
@@ -448,7 +448,7 @@
     if (!_dumpedTP && items2.length) {
       _dumpedTP = true;
       const sample = (_b = items2.find((i) => i && i.three_point)) == null ? void 0 : _b.three_point;
-      if (sample) console.debug("[BiliKit Feed] three_point 样本（校对「我不想看」reason id/name 用）:", JSON.stringify(sample));
+      if (sample) console.debug("[BiliKit-Web Feed] three_point 样本（校对「我不想看」reason id/name 用）:", JSON.stringify(sample));
     }
     const cards = items2.map(normalize).filter((c) => !!c && c.goto === "av");
     const code = typeof (json == null ? void 0 : json.code) === "number" ? json.code : -1;
@@ -916,7 +916,7 @@
       }
     } catch (e) {
       errored = true;
-      console.warn("[BiliKit Feed] dash 取流失败：", (e == null ? void 0 : e.message) || e);
+      console.warn("[BiliKit-Web Feed] dash 取流失败：", (e == null ? void 0 : e.message) || e);
     }
     if (!errored) {
       dashCache.set(bvid, out);
@@ -935,10 +935,10 @@
       const j = await requestPlayurl(bvid, cid, 1, 16);
       const durl = (_a = j == null ? void 0 : j.data) == null ? void 0 : _a.durl;
       if (Array.isArray(durl) && durl.length) sources = prefer(durl.flatMap((x) => [x.url, ...x.backup_url || []]));
-      else console.warn("[BiliKit Feed] durl 为空 code=", j == null ? void 0 : j.code, j == null ? void 0 : j.message);
+      else console.warn("[BiliKit-Web Feed] durl 为空 code=", j == null ? void 0 : j.code, j == null ? void 0 : j.message);
     } catch (e) {
       errored = true;
-      console.warn("[BiliKit Feed] durl 取流失败：", (e == null ? void 0 : e.message) || e);
+      console.warn("[BiliKit-Web Feed] durl 取流失败：", (e == null ? void 0 : e.message) || e);
     }
     if (!errored) {
       durlCache.set(bvid, sources);
@@ -1057,7 +1057,7 @@
   function attachMse(video, dash) {
     const MS = MS_CTOR();
     if (!MS) {
-      console.debug("[BiliKit Feed] MSE 不可用：无 MediaSource");
+      console.debug("[BiliKit-Web Feed] MSE 不可用：无 MediaSource");
       return Promise.resolve(false);
     }
     return new Promise((resolve) => {
@@ -1068,7 +1068,7 @@
       let playWatch = null;
       const pumpListeners = [];
       const onPlaying = () => finish(true);
-      const onVidErr = () => console.debug("[BiliKit Feed] MSE video error code=", video.error && video.error.code);
+      const onVidErr = () => console.debug("[BiliKit-Web Feed] MSE video error code=", video.error && video.error.code);
       video.addEventListener("playing", onPlaying);
       video.addEventListener("error", onVidErr, { once: true });
       const safeEnd = () => {
@@ -1188,7 +1188,7 @@
                   fetched += data.byteLength;
                 } catch (e) {
                   if (dead) return;
-                  console.debug("[BiliKit Feed] MSE 补拉失败：", e == null ? void 0 : e.message);
+                  console.debug("[BiliKit-Web Feed] MSE 补拉失败：", e == null ? void 0 : e.message);
                   ended = true;
                   safeEnd();
                 } finally {
@@ -1212,19 +1212,19 @@
               await pump();
             }
             if (dead) return;
-            video.play().catch((e) => console.debug("[BiliKit Feed] MSE play() rej", e == null ? void 0 : e.name));
+            video.play().catch((e) => console.debug("[BiliKit-Web Feed] MSE play() rej", e == null ? void 0 : e.name));
             playWatch = setTimeout(() => {
-              console.debug("[BiliKit Feed] MSE 起播看门狗超时 rs=", video.readyState);
+              console.debug("[BiliKit-Web Feed] MSE 起播看门狗超时 rs=", video.readyState);
               finish(false);
             }, PLAY_WATCH);
           } catch (e) {
             if (dead) return;
-            console.debug("[BiliKit Feed] MSE 装载失败：", (e == null ? void 0 : e.message) || e);
+            console.debug("[BiliKit-Web Feed] MSE 装载失败：", (e == null ? void 0 : e.message) || e);
             finish(false);
           }
         }, { once: true });
       } catch (e) {
-        console.debug("[BiliKit Feed] MSE 初始化失败：", (e == null ? void 0 : e.message) || e);
+        console.debug("[BiliKit-Web Feed] MSE 初始化失败：", (e == null ? void 0 : e.message) || e);
         finish(false);
       }
     });
@@ -1279,7 +1279,7 @@
       });
       video.addEventListener("error", () => {
         if (mode === "durl" && ci + 1 < cands.length) {
-          console.warn(`[BiliKit Feed] durl 源#${ci} 失败，换下一个`);
+          console.warn(`[BiliKit-Web Feed] durl 源#${ci} 失败，换下一个`);
           playDurl(ci + 1);
         } else if (mode === "durl") attemptOk = false;
       });
@@ -1393,7 +1393,7 @@
             teardown();
             return;
           }
-          if (ok) console.debug(`[BiliKit Feed] MSE 起播 ${performance.now() - t0 | 0}ms ${bvid}`);
+          if (ok) console.debug(`[BiliKit-Web Feed] MSE 起播 ${performance.now() - t0 | 0}ms ${bvid}`);
         }
         if (!ok) {
           const srcs = await getDurlSources(bvid, cid);
@@ -1794,7 +1794,7 @@
       storage.setItem(KEY, JSON.stringify(value));
       return true;
     } catch (error) {
-      console.warn("[BiliKit Feed] 保存返回状态失败，将按普通当前页导航：", error);
+      console.warn("[BiliKit-Web Feed] 保存返回状态失败，将按普通当前页导航：", error);
       return false;
     }
   }
@@ -2032,7 +2032,7 @@
         const { code, message, cards } = source === "web" ? await fetchWebFeed(webFreshIdx++) : await fetchAppFeed(getAccessKey());
         if (gen !== feedGen) return;
         if (code !== 0) {
-          console.warn(`[BiliKit Feed] 加载失败 code=${code} ${message}`);
+          console.warn(`[BiliKit-Web Feed] 加载失败 code=${code} ${message}`);
           failed = true;
           break;
         }
@@ -2061,7 +2061,7 @@
         }
       }
     } catch (e) {
-      console.error("[BiliKit Feed] 加载出错：", e);
+      console.error("[BiliKit-Web Feed] 加载出错：", e);
       failed = true;
     } finally {
       if (gen === feedGen) {
@@ -2212,13 +2212,13 @@
     }
     return true;
   }
-  const REPO = "https://github.com/shiinayane/BiliKit";
+  const REPO = "https://github.com/shiinayane/BiliKit-Web";
   function warnCoreMissing() {
     if (!grid || !topSpacer) return;
     if (localStorage.getItem("bilikit:dismiss.core-missing") || grid.querySelector(`.${NS}-warn`)) return;
     const bar = document.createElement("div");
     bar.className = `${NS}-warn`;
-    bar.innerHTML = `<span>未检测到 <b>BiliKit Core</b>：登录、设置、抽屉净化都需要它。</span><a href="${REPO}" target="_blank" rel="noopener">前往安装</a><button class="bk-x" aria-label="关闭">✕</button>`;
+    bar.innerHTML = `<span>未检测到 <b>BiliKit-Web Core</b>：登录、设置、抽屉净化都需要它。</span><a href="${REPO}" target="_blank" rel="noopener">前往安装</a><button class="bk-x" aria-label="关闭">✕</button>`;
     bar.querySelector(".bk-x").addEventListener("click", () => {
       try {
         localStorage.setItem("bilikit:dismiss.core-missing", "1");

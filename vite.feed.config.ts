@@ -3,7 +3,7 @@ import monkey from 'vite-plugin-monkey'
 import { FEED_VERSION } from './src/feed/version'
 import { ICON } from './icon'
 
-// BiliKit Feed：App 推荐 feed（把手机 App 的推荐流搬上首页）。
+// BiliKit-Web Feed：App 推荐 feed（把手机 App 的推荐流搬上首页）。
 // 需 GM.xmlHttpRequest 跨域拉 app.bilibili.com → Safari 下会被注入「隔离世界」，
 // 所以与 Core（@grant none 页面世界）拆成两个脚本；两者同源、靠 localStorage 共享设置。
 // 详见 docs/RESEARCH-feed.md。
@@ -12,10 +12,10 @@ export default defineConfig({
     monkey({
       entry: 'src/entry-feed.ts',
       userscript: {
-        name: 'BiliKit Feed',
-        namespace: 'https://github.com/shiinayane/BiliKit',
+        name: 'BiliKit-Web Feed',
+        namespace: 'https://github.com/shiinayane/BiliKit-Web',
         version: FEED_VERSION,
-        description: 'B 站首页换成手机 App 的个性化推荐流。零框架纯原生实现（无 React/Vue、gzip 约 29KB）+ 窗口化虚拟化，约束 DOM、封面与预览媒体的常驻资源。视频默认开新标签页，也可选当前页或底部抽屉；封面悬停「真视频」秒开预览（MSE，接近原生 App）。需配合 BiliKit Core（登录 / 设置）。',
+        description: 'B 站首页换成手机 App 的个性化推荐流。零框架纯原生实现（无 React/Vue、gzip 约 30KB）+ 窗口化虚拟化，约束 DOM、封面与预览媒体的常驻资源。视频默认开新标签页，也可选当前页或底部抽屉；封面悬停「真视频」秒开预览（MSE，接近原生 App）。需配合 BiliKit-Web Core（登录 / 设置）。',
         author: 'shiinayane',
         license: 'MIT',
         icon: ICON,
@@ -30,6 +30,7 @@ export default defineConfig({
         'run-at': 'document-idle',
       },
       build: {
+        // 保留既有发布文件名：GreasyFork 同步地址与已安装脚本的更新链依赖这个稳定路径。
         fileName: 'bilikit-feed.user.js',
       },
     }),

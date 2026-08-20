@@ -1,10 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="BiliKit">
-  <title>BiliKit</title>
-  <rect width="512" height="512" rx="116" fill="#FB7299"/>
-  <g stroke="#fff" stroke-width="26" stroke-linecap="round">
-    <line x1="212" y1="182" x2="166" y2="104"/>
-    <line x1="300" y1="182" x2="346" y2="104"/>
-  </g>
-  <rect x="108" y="176" width="296" height="236" rx="54" fill="#fff"/>
-  <path d="M234 258 302 294 234 330 Z" fill="#00AEEC" stroke="#00AEEC" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="BiliKit-Web">
+  <title>BiliKit-Web</title>
+  <path d="M811.331 691.122L562.396 442.188C534.678 414.47 485.299 418.91 452.104 452.104C418.909 485.299 414.47 534.678 442.188 562.396L691.122 811.331C718.841 839.049 768.22 834.609 801.415 801.415C834.609 768.22 839.049 718.841 811.331 691.122Z" fill="#FF607A" style="fill:#FF607A;fill:color(display-p3 1.0000 0.3765 0.4784);fill-opacity:1;"/>
+  <path d="M691.122 213.188L442.188 462.122C414.47 489.841 418.91 539.22 452.104 572.415C485.299 605.609 534.678 610.049 562.396 582.331L811.331 333.396C839.049 305.678 834.609 256.299 801.415 223.104C768.22 189.909 718.841 185.47 691.122 213.188Z" fill="#FF607A" style="fill:#FF607A;fill:color(display-p3 1.0000 0.3765 0.4784);fill-opacity:1;"/>
+  <path d="M254.292 221C215.57 221 185 251 185 289V735C185 773 215.57 803 254.292 803C274.672 803 293.014 796 308.299 783L570.183 568C599.734 542 614 525 614 512C614 499 599.734 482 570.183 456L308.299 241C293.014 225 274.672 221 254.292 221Z" fill="#195CFF" style="fill:#195CFF;fill:color(display-p3 0.0980 0.3608 1.0000);fill-opacity:1;"/>
 </svg>

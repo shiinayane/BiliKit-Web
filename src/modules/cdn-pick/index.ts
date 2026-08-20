@@ -21,7 +21,7 @@ function init(cfg: Cfg): void {
   const log = (...a: unknown[]) => { if (DEBUG) console.log('[CDN优选]', ...a) }
 
   if (!TARGET_HOST) {
-    if (configuredHost) console.warn('[BiliKit] CDN 优选已禁用：自定义节点必须是 bilivideo/acgvideo 受信后缀下的纯主机名。')
+    if (configuredHost) console.warn('[BiliKit-Web] CDN 优选已禁用：自定义节点必须是 bilivideo/acgvideo 受信后缀下的纯主机名。')
     else log('TARGET_HOST 为空，未启用')
     return
   }

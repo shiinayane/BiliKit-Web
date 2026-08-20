@@ -113,7 +113,7 @@ export async function getDashPreview(bvid: string, cid0?: string): Promise<DashP
     }
   } catch (e) {
     errored = true
-    console.warn('[BiliKit Feed] dash 取流失败：', (e as Error)?.message || e)
+    console.warn('[BiliKit-Web Feed] dash 取流失败：', (e as Error)?.message || e)
   }
   if (!errored) { dashCache.set(bvid, out); lru(dashCache) } // 只缓存成功；异常不缓存 → 下次重试
   return out
@@ -130,10 +130,10 @@ export async function getDurlSources(bvid: string, cid0?: string): Promise<strin
     const j = await requestPlayurl(bvid, cid, 1, 16) // mp4 durl 360p
     const durl = j?.data?.durl
     if (Array.isArray(durl) && durl.length) sources = prefer(durl.flatMap((x: any) => [x.url, ...(x.backup_url || [])]))
-    else console.warn('[BiliKit Feed] durl 为空 code=', j?.code, j?.message)
+    else console.warn('[BiliKit-Web Feed] durl 为空 code=', j?.code, j?.message)
   } catch (e) {
     errored = true
-    console.warn('[BiliKit Feed] durl 取流失败：', (e as Error)?.message || e)
+    console.warn('[BiliKit-Web Feed] durl 取流失败：', (e as Error)?.message || e)
   }
   if (!errored) { durlCache.set(bvid, sources); lru(durlCache) }
   return sources

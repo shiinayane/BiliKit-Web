@@ -82,14 +82,14 @@ export function gmRequest(opts: { method: string; url: string; data?: string; he
         const t = r.responseText || ''
         if (t.trimStart().startsWith('<')) {
           // 诊断：返回 HTML 而非 JSON（多为风控/登录拦截）。注意 access_key 脱敏、不打响应头(可能含 Set-Cookie)。
-          console.error('[BiliKit Feed] 非 JSON 响应（可能被风控/登录拦截）：',
+          console.error('[BiliKit-Web Feed] 非 JSON 响应（可能被风控/登录拦截）：',
             'status =', r.status, r.statusText,
             'url =', redactKey(r.finalUrl || opts.url),
             '\n  正文(前 300) =\n', t.slice(0, 300))
         }
         resolve(t)
       },
-      onerror: (r: any) => { console.error('[BiliKit Feed] onerror：', r && r.status); reject(new Error('网络错误')) },
+      onerror: (r: any) => { console.error('[BiliKit-Web Feed] onerror：', r && r.status); reject(new Error('网络错误')) },
       ontimeout: () => reject(new Error('请求超时')),
       onabort: () => reject(new Error('请求被中止')), // 否则中止时 Promise 永不 settle → 上游 loading 卡死
     })
@@ -191,7 +191,7 @@ export async function fetchAppFeed(accessKey = ''): Promise<{ code: number; mess
   if (!_dumpedTP && items.length) {
     _dumpedTP = true
     const sample = items.find((i) => i && i.three_point)?.three_point
-    if (sample) console.debug('[BiliKit Feed] three_point 样本（校对「我不想看」reason id/name 用）:', JSON.stringify(sample))
+    if (sample) console.debug('[BiliKit-Web Feed] three_point 样本（校对「我不想看」reason id/name 用）:', JSON.stringify(sample))
   }
   const cards = items.map(normalize).filter((c): c is FeedCard => !!c && c.goto === 'av')
   // code 归一为 number：缺失/非数字一律当失败(-1)，避免调用方 `===0`/`!code` 误判

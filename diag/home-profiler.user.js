@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         BiliKit · 首页性能探针（诊断用）
-// @name:en      BiliKit · Homepage Profiler (diagnostic)
-// @namespace    https://github.com/shiinayane/BiliKit
+// @name         BiliKit-Web · 首页性能探针（诊断用）
+// @name:en      BiliKit-Web · Homepage Profiler (diagnostic)
+// @namespace    https://github.com/shiinayane/BiliKit-Web
 // @version      0.2.0
-// @description  只观测、不改写行为：统计 B 站首页的定时器密度 / 长任务 / 网络埋点 / DOM 增长，用于决定优化方向。测原生基线时请先关掉 BiliKit Feed（和 Core）。
+// @description  只观测、不改写行为：统计 B 站首页的定时器密度 / 长任务 / 网络埋点 / DOM 增长，用于决定优化方向。测原生基线时请先关掉 BiliKit-Web Feed（和 Core）。
 // @author       shiinayane
 // @match        *://www.bilibili.com/
 // @match        *://www.bilibili.com/?*
@@ -22,7 +22,7 @@
  *  - performance.memory 仅 Chrome 有；Safari 下自动跳过（用 DOM 节点数当内存代理）。
  *
  * 用法：
- *  1) 测原生基线 → 先在 Userscripts 关掉 BiliKit Feed / Core，刷新首页。
+ *  1) 测原生基线 → 先在 Userscripts 关掉 BiliKit-Web Feed / Core，刷新首页。
  *  2) 右下角出现「性能探针」面板，实时滚动数字；刷一会儿（滚动几屏、停留 30~60s）。
  *  3) 点面板「打印报告」或控制台执行 __biliProfReport()，把 console 里的表格截图/复制给我。
  *  4) 想对比：开 Feed 再来一遍，两份报告对照。
@@ -182,7 +182,7 @@
   function buildText() {
     const secs = (now() - T0) / 1000;
     const L = [];
-    L.push('===== BiliKit 首页性能探针报告 =====');
+    L.push('===== BiliKit-Web 首页性能探针报告 =====');
     L.push(`运行 ${secs.toFixed(1)}s ｜ Feed/Core ${document.querySelector('.bk-feed-grid') ? '疑似开启' : '未检测到'} ｜ UA ${navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome') ? 'Safari' : '其它'}`);
 
     L.push('\n— 定时器 —');

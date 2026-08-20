@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         BiliKit Mem Probe（内存侧测探针·调试用）
+// @name         BiliKit-Web Mem Probe（内存侧测探针·调试用）
 // @namespace    bilikit.debug
 // @version      1.1.0
 // @description  Safari 无 JS 堆 API，故侧测「与内存强相关」的代理指标：DOM 节点数、各 <video> 的 buffered 秒数(按来源分类)、outstanding objectURL、检测到的「已脱离 DOM 但未回收」的 video。每 5s 采样，Ctrl+Shift+M 导出 JSON。刷半天后导出发回分析。
@@ -11,7 +11,7 @@
 
 /*
  * 用法：
- *  1) 侧载本脚本（与 BiliKit Core/Feed 并存）；
+ *  1) 侧载本脚本（与 BiliKit-Web Core/Feed 并存）；
  *  2) 正常刷首页 / 开抽屉看视频「半天」，控制台每 5s 会打一行趋势（[bkProbe top] t=…s dom=… vDom=… …）；
  *  3) 感觉内存飙了、或刷够了 → 在**顶层页面**按 Ctrl+Shift+M（或控制台执行 __bkProbe.dump()）；
  *     → 会把全部采样（含同源子框架/抽屉 iframe 的）合并成 JSON：复制到剪贴板 + 下载成文件 + 打到控制台；

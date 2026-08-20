@@ -71,13 +71,13 @@
 - **TV/app 线比 web cookie 多能干的**:无水印源流、更高画质(8K/HDR/DV)、TV 域番剧、`area=hk|tw` 区域解锁(绕 `-10403`)。代价:token 绑定发它的那对 appkey,换 key 调用即 `-663`。
 - **纠正**:yutto v2 现在用的是 **web SESSDATA** 扫码,不是 TV key;强绑 TV-key 的主要是 BBDown/DownKyi/各 TV 客户端。
 
-## 六、若 BiliKit 自建 feed——改善优先级
+## 六、若 BiliKit-Web 自建 feed——改善优先级
 
 1. **配好 access_key**(TV 扫码):匿名热门流 → 真·个性化,同时避开反爬固定池。**最大杠杆。**
 2. **加跨刷新的 bvid「已展示」集合**(可持久化 localStorage):App 接口没有 `last_showlist`,得自己在客户端补去重。纯前端、改动最小、不依赖账号配置。
 3. **少混料**:别把有限的收藏/动态洗进推荐反复出现。
 
-> 与 BiliKit 现状的关系:当前 BiliKit 是纯 web 前端油猴脚本(评论/主题/播放页增强),TV access_key 只在将来做"取流/下载/区域解锁"这类 app 域功能时才需要。留在浏览器内的功能走 SESSDATA/WBI 即可。
+> 与 BiliKit-Web 现状的关系:当前 BiliKit-Web 是纯 web 前端油猴脚本(评论/主题/播放页增强),TV access_key 只在将来做"取流/下载/区域解锁"这类 app 域功能时才需要。留在浏览器内的功能走 SESSDATA/WBI 即可。
 
 ## 参考
 

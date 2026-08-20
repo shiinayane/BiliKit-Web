@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         BiliKit · 浮窗抽屉
-// @name:en      BiliKit · Float
-// @namespace    https://github.com/shiinayane/BiliKit
+// @name         BiliKit-Web · 浮窗抽屉
+// @name:en      BiliKit-Web · Float
+// @namespace    https://github.com/shiinayane/BiliKit-Web
 // @version      0.18.12
-// @description    ⚠️【已停止单独维护，建议改用 BiliKit 套件 Core + Feed】点击 B 站视频，在页内抽屉中播放，而非跳转新标签页或当前页面。
+// @description    ⚠️【已停止单独维护，建议改用 BiliKit-Web 套件 Core + Feed】点击 B 站视频，在页内抽屉中播放，而非跳转新标签页或当前页面。
 // @description:en Click a Bilibili video to play it in an in-page drawer instead of opening a new tab or navigating away.
 // @author       shiinayane
 // @match        *://www.bilibili.com/*

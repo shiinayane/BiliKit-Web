@@ -1,10 +1,10 @@
 {
-  "name": "bilikit",
+  "name": "bilikit-web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "packageManager": "pnpm@11.5.2",
-  "description": "BiliKit · B 站增强套件（Safari 友好，页面世界注入）。构建产出统一的 BiliKit Core / Feed 用户脚本。",
+  "description": "BiliKit-Web · B 站增强套件（Safari 友好，页面世界注入）。构建产出统一的 BiliKit-Web Core / Feed 用户脚本。",
   "scripts": {
     "dev": "vite",
     "build": "npm run build:core && npm run build:feed",

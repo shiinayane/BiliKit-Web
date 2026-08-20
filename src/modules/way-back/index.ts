@@ -6,9 +6,9 @@ import { videoIdOf as videoIdOfBase, cleanTitle, dedupeArrival, type Entry } fro
 
 /**
  * 回程：视频页左下角「回退栈」胶囊——记住站内连续跳视频的「来时路」，点一下跳回上一个并续播。
- * 迁自独立脚本 way-back.user.js。普通标签只旁观记录；只有 BiliKit 自动打开且显式启用实验开关的
+ * 迁自独立脚本 way-back.user.js。普通标签只旁观记录；只有 BiliKit-Web 自动打开且显式启用实验开关的
  * Safari 新标签，才把跨视频 SPA pushState 改成 replaceState，让原生左滑关闭回到来源页。
- * 顶层窗口与 BiliKit 抽屉 iframe（#bk-drawer）都跑：抽屉里连续点相关视频也能就地回退。
+ * 顶层窗口与 BiliKit-Web 抽屉 iframe（#bk-drawer）都跑：抽屉里连续点相关视频也能就地回退。
  * 回退栈存 sessionStorage（按标签页/frame 隔离）；历史压扁只作用于一次性 window.name 标记的子标签。
  * 胶囊深浅色跟随系统；「正在播放」行带动画声波条。
  */

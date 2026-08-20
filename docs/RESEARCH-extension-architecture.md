@@ -1,4 +1,4 @@
-# BiliKit 跨浏览器扩展架构与迁移路线
+# BiliKit-Web 跨浏览器扩展架构与迁移路线
 
 > 状态：架构研究稿，尚未开始扩展实现。  
 > 调研日期：2026-07-21。  
@@ -7,7 +7,7 @@
 
 ## 1. 结论先行
 
-BiliKit 不应维护四套浏览器扩展，也不应把现有用户脚本一次性重写掉。推荐形态是：
+BiliKit-Web 不应维护四套浏览器扩展，也不应把现有用户脚本一次性重写掉。推荐形态是：
 
 > **一套跨浏览器 WebExtension 核心，按浏览器生成独立产物；现有 Core / Feed 用户脚本继续作为兼容发行物，共享纯逻辑与功能控制器。**
 
@@ -31,7 +31,7 @@ WXT 当前面向 Chrome、Firefox、Edge、Safari并支持 MV2/MV3 多目标构�
 
 ## 2. 为什么现在不能直接开始重写
 
-当前 BiliKit 不是普通的“往网页插几个按钮”：
+当前 BiliKit-Web 不是普通的“往网页插几个按钮”：
 
 - Core 必须在页面世界拦截 B 站播放器的 `fetch` / `XMLHttpRequest`，还要读取 lit/Web Component 实例数据；
 - Feed 目前依靠 `GM.xmlHttpRequest` 跨域访问 App API 和媒体 Range，运行在隔离世界；
@@ -73,7 +73,7 @@ WXT 当前面向 Chrome、Firefox、Edge、Safari并支持 MV2/MV3 多目标构�
 - 与当前 Vite + TypeScript 技术栈接近，不强制React/Vue；
 - 有明确的 background/content/popup/options/unlisted script入口模型；
 - 可按浏览器和MV版本生成独立构建；
-- 提供 `injectScript`，适合“隔离世界父脚本 + main-world子脚本”的BiliKit需求；
+- 提供 `injectScript`，适合“隔离世界父脚本 + main-world子脚本”的BiliKit-Web需求；
 - 内建统一的Promise风格 `browser` API；
 - 内建带类型、watch和migration的Storage；
 - 对Vitest提供 `@webext-core/fake-browser`；
@@ -84,15 +84,15 @@ WXT的main-world文档明确指出：直接使用 `world: "MAIN"` 存在浏览�
 
 ### 4.2 暂不选择 Plasmo
 
-Plasmo适合React-first、内容脚本UI较重、希望大量约定式生成的项目，也自带存储/消息和多目标构建。但它对BiliKit的主要价值与WXT重叠，而BiliKit并不需要React-first结构；其官方仓库当前仍将框架标为alpha，且main-world/内容UI抽象对我们最关键的页面hook没有明显优势。参见 [Plasmo官方文档](https://docs.plasmo.com/) 与 [官方仓库](https://github.com/PlasmoHQ/plasmo)。
+Plasmo适合React-first、内容脚本UI较重、希望大量约定式生成的项目，也自带存储/消息和多目标构建。但它对BiliKit-Web的主要价值与WXT重叠，而BiliKit-Web并不需要React-first结构；其官方仓库当前仍将框架标为alpha，且main-world/内容UI抽象对我们最关键的页面hook没有明显优势。参见 [Plasmo官方文档](https://docs.plasmo.com/) 与 [官方仓库](https://github.com/PlasmoHQ/plasmo)。
 
 ### 4.3 暂不选择 CRXJS
 
-CRXJS是活跃的Vite插件，适合Chromium MV3和HMR，但官方定位仍以Chrome Extension为核心。BiliKit必须同时覆盖Firefox的Event Page、Safari打包和跨浏览器main-world注入，选择它意味着这些差异继续由项目自己维护。参见 [CRXJS npm说明](https://www.npmjs.com/package/@crxjs/vite-plugin)。
+CRXJS是活跃的Vite插件，适合Chromium MV3和HMR，但官方定位仍以Chrome Extension为核心。BiliKit-Web必须同时覆盖Firefox的Event Page、Safari打包和跨浏览器main-world注入，选择它意味着这些差异继续由项目自己维护。参见 [CRXJS npm说明](https://www.npmjs.com/package/@crxjs/vite-plugin)。
 
 ### 4.4 暂不选择 Extension.js
 
-Extension.js 3已能很好地覆盖Chrome、Edge、Firefox，并处理Chromium Service Worker与Firefox Event Page差异；但其CLI当前不支持Safari目标，需要把Safari另接一套构建步骤。Safari是BiliKit的首要平台，因此不如WXT匹配。参见 [Extension.js浏览器支持](https://extension.js.org/docs/browsers/browsers-available)。
+Extension.js 3已能很好地覆盖Chrome、Edge、Firefox，并处理Chromium Service Worker与Firefox Event Page差异；但其CLI当前不支持Safari目标，需要把Safari另接一套构建步骤。Safari是BiliKit-Web的首要平台，因此不如WXT匹配。参见 [Extension.js浏览器支持](https://extension.js.org/docs/browsers/browsers-available)。
 
 ### 4.5 不直接手写 Vite + 四套 manifest
 
@@ -106,7 +106,7 @@ Extension.js 3已能很好地覆盖Chrome、Edge、Firefox，并处理Chromium S
 - 多商店zip和提交；
 - manifest权限漂移。
 
-只有当WXT的main-world注入或构建结果在原型阶段被证明无法满足BiliKit时，才退回低层构建。
+只有当WXT的main-world注入或构建结果在原型阶段被证明无法满足BiliKit-Web时，才退回低层构建。
 
 ## 5. UI框架决策
 
@@ -239,7 +239,7 @@ Popup和Options只通过storage/background使用能力，不直接耦合B站页�
 | Firefox | `background.scripts`非持久Event Page | ZIP/XPI + source ZIP / AMO | 必须配置Gecko ID；构建产物需可复现；API行为与Chromium有差异 |
 | Safari | 优先Service Worker | WebExtension目录 → Apple packager/Xcode/App Store | 网站访问需用户授权；DNR重定向/改header要求额外权限；原生包装独立 |
 
-WXT默认可能为Safari/Firefox选择MV2；BiliKit应显式构建MV3，并在原型阶段验证生成的background字段和main-world注入时序。若框架在特定目标生成不正确，使用WXT的per-browser manifest函数或hook修正，而不是在运行时堆浏览器判断。
+WXT默认可能为Safari/Firefox选择MV2；BiliKit-Web应显式构建MV3，并在原型阶段验证生成的background字段和main-world注入时序。若框架在特定目标生成不正确，使用WXT的per-browser manifest函数或hook修正，而不是在运行时堆浏览器判断。
 
 Edge官方说明Chrome扩展API和manifest大体代码兼容，但少数API仍需核对，且应在Edge中实际侧载验证。参见 [Microsoft移植说明](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/port-chrome-extension) 与 [API支持表](https://learn.microsoft.com/en-us/microsoft-edge/extensions/developer-guide/api-support)。
 
@@ -248,7 +248,7 @@ Edge官方说明Chrome扩展API和manifest大体代码兼容，但少数API仍�
 第一阶段不要拆成几十个小包，使用四个清晰边界即可：
 
 ```text
-BiliKit/
+BiliKit-Web/
 ├─ apps/
 │  ├─ extension/
 │  │  ├─ src/
@@ -458,7 +458,7 @@ Safari支持DNR的block/allow/redirect/modifyHeaders等动作，但redirect与mo
 
 ### 14.1 单一用途与隐私
 
-四家商店都需要清楚说明扩展用途和权限。BiliKit应使用一个明确目的：
+四家商店都需要清楚说明扩展用途和权限。BiliKit-Web应使用一个明确目的：
 
 > 改善Bilibili网页的推荐、播放和浏览体验。
 

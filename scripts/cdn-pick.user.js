@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         BiliKit · CDN 优选
-// @name:en      BiliKit · CDN Pick
-// @namespace    https://github.com/shiinayane/BiliKit
+// @name         BiliKit-Web · CDN 优选
+// @name:en      BiliKit-Web · CDN Pick
+// @namespace    https://github.com/shiinayane/BiliKit-Web
 // @version      0.7.5
-// @description    ⚠️【已废弃·功能并入 BiliKit Core，请改装 Core】把 B 站视频分片重定向到指定 CDN 镜像，绕开被分到的慢节点（海外 Akamai 等）。Safari 友好：页面世界注入、不依赖 GM/unsafeWindow，故能拦到播放器真正的请求（CCB 等脚本在 Safari Userscripts 下因 grant 被注入隔离世界而失效）。
+// @description    ⚠️【已废弃·功能并入 BiliKit-Web Core，请改装 Core】把 B 站视频分片重定向到指定 CDN 镜像，绕开被分到的慢节点（海外 Akamai 等）。Safari 友好：页面世界注入、不依赖 GM/unsafeWindow，故能拦到播放器真正的请求（CCB 等脚本在 Safari Userscripts 下因 grant 被注入隔离世界而失效）。
 // @description:en Redirect Bilibili video segments to a chosen CDN mirror, bypassing the slow node you were assigned (e.g. overseas Akamai). Safari-friendly: page-world injection without GM/unsafeWindow.
 // @author       shiinayane
 // @match        *://www.bilibili.com/video/*
@@ -20,9 +20,9 @@
 // ==/UserScript==
 
 /*
- * ⚠️ 已并入 BiliKit Core，建议迁移：本功能已整合进新脚本 BiliKit Core
+ * ⚠️ 已并入 BiliKit-Web Core，建议迁移：本功能已整合进新脚本 BiliKit-Web Core
  * （CDN 优选 + 主题同步 + 评论属地 + 防睡眠 + 统一设置面板），后续更新只在新脚本进行。
- * 安装：https://greasyfork.org/scripts?q=BiliKit
+ * 安装：https://greasyfork.org/scripts?q=BiliKit-Web
  * 装新版后可卸载本脚本；二者有单例守卫，短期并存不冲突。
  */
 
@@ -43,7 +43,7 @@
 (() => {
   'use strict'
 
-  // 【已并入 BiliKit Core】检测到 Core 在运行则提示本独立脚本可卸载（一次性、可关闭；不影响本脚本功能）。
+  // 【已并入 BiliKit-Web Core】检测到 Core 在运行则提示本独立脚本可卸载（一次性、可关闭；不影响本脚本功能）。
   if (window.top === window.self) setTimeout(() => {
     try {
       if (Date.now() - (Number(localStorage.getItem('bilikit:alive.core')) || 0) > 15000) return
@@ -51,7 +51,7 @@
       if (localStorage.getItem(K)) return
       const b = document.createElement('div')
       b.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:2147483600;max-width:300px;padding:10px 34px 10px 14px;border-radius:10px;background:rgba(22,23,28,.96);color:#e3e5e7;font:13px/1.5 -apple-system,"PingFang SC",sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4)'
-      b.innerHTML = '「CDN 优选」已并入 <b style="color:#fb7299">BiliKit Core</b>，本独立脚本可卸载。<a href="https://github.com/shiinayane/BiliKit" target="_blank" rel="noopener" style="color:#fb7299;text-decoration:none">详情</a>'
+      b.innerHTML = '「CDN 优选」已并入 <b style="color:#fb7299">BiliKit-Web Core</b>，本独立脚本可卸载。<a href="https://github.com/shiinayane/BiliKit-Web" target="_blank" rel="noopener" style="color:#fb7299;text-decoration:none">详情</a>'
       const x = document.createElement('span')
       x.textContent = '✕'
       x.style.cssText = 'position:absolute;top:7px;right:11px;cursor:pointer;opacity:.55'

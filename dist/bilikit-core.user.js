@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name         BiliKit Core
-// @namespace    https://github.com/shiinayane/BiliKit
+// @name         BiliKit-Web Core
+// @namespace    https://github.com/shiinayane/BiliKit-Web
 // @version      0.5.33
 // @author       shiinayane
 // @description  B 站体验增强核心，一装到位：CDN 优选（救海外卡顿）· 免登录看评论/动态/1080p · 主题跟随系统深浅 · 评论显性别/IP 属地 · 播放不息屏——统一设置面板集中开关。Safari 友好、无需扩展、零外部依赖。
 // @license      MIT
-// @icon         data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22116%22%20fill%3D%22%23FB7299%22%2F%3E%3Cg%20stroke%3D%22%23fff%22%20stroke-width%3D%2226%22%20stroke-linecap%3D%22round%22%3E%3Cline%20x1%3D%22212%22%20y1%3D%22182%22%20x2%3D%22166%22%20y2%3D%22104%22%2F%3E%3Cline%20x1%3D%22300%22%20y1%3D%22182%22%20x2%3D%22346%22%20y2%3D%22104%22%2F%3E%3C%2Fg%3E%3Crect%20x%3D%22108%22%20y%3D%22176%22%20width%3D%22296%22%20height%3D%22236%22%20rx%3D%2254%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M234%20258%20302%20294%20234%20330Z%22%20fill%3D%22%2300AEEC%22%20stroke%3D%22%2300AEEC%22%20stroke-width%3D%2218%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E
+// @icon         data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201024%22%3E%3Cpath%20d%3D%22M811.331%20691.122L562.396%20442.188C534.678%20414.47%20485.299%20418.91%20452.104%20452.104C418.909%20485.299%20414.47%20534.678%20442.188%20562.396L691.122%20811.331C718.841%20839.049%20768.22%20834.609%20801.415%20801.415C834.609%20768.22%20839.049%20718.841%20811.331%20691.122Z%22%20fill%3D%22%23FF607A%22%2F%3E%3Cpath%20d%3D%22M691.122%20213.188L442.188%20462.122C414.47%20489.841%20418.91%20539.22%20452.104%20572.415C485.299%20605.609%20534.678%20610.049%20562.396%20582.331L811.331%20333.396C839.049%20305.678%20834.609%20256.299%20801.415%20223.104C768.22%20189.909%20718.841%20185.47%20691.122%20213.188Z%22%20fill%3D%22%23FF607A%22%2F%3E%3Cpath%20d%3D%22M254.292%20221C215.57%20221%20185%20251%20185%20289V735C185%20773%20215.57%20803%20254.292%20803C274.672%20803%20293.014%20796%20308.299%20783L570.183%20568C599.734%20542%20614%20525%20614%20512C614%20499%20599.734%20482%20570.183%20456L308.299%20241C293.014%20225%20274.672%20221%20254.292%20221Z%22%20fill%3D%22%23195CFF%22%2F%3E%3C%2Fsvg%3E
 // @match        *://*.bilibili.com/*
 // @grant        none
 // @run-at       document-start
@@ -120,7 +120,7 @@
   function register(...mods) {
     for (const m of mods) {
       if (registry.some((x) => x.id === m.id)) {
-        console.warn(`[BiliKit] 模块 id 重复，已忽略：${m.id}`);
+        console.warn(`[BiliKit-Web] 模块 id 重复，已忽略：${m.id}`);
         continue;
       }
       registry.push(m);
@@ -136,7 +136,7 @@
         try {
           m.init(makeCfg(m));
         } catch (e) {
-          console.error(`[BiliKit] 模块「${m.id}」初始化出错：`, e);
+          console.error(`[BiliKit-Web] 模块「${m.id}」初始化出错：`, e);
         }
       };
       if (m.runAt === "idle" && document.readyState === "loading") {
@@ -1956,7 +1956,7 @@
     }
   </style>
   <div class="ov"><div class="card">
-    <div class="title"><b>BiliKit</b> · 登录 App 推荐</div>
+    <div class="title"><b>BiliKit-Web</b> · 登录 App 推荐</div>
     <div class="hint">用手机哔哩哔哩 App 扫码</div>
     <div class="qr"><img alt=""></div>
     <div class="status">正在获取二维码…</div>
@@ -2451,16 +2451,16 @@
       }
     }
     navEl.appendChild(el("div", "nav-cat", ABOUT_CAT));
-    navEl.appendChild(navItemSpecial(ABOUT_ID, "关于 BiliKit"));
+    navEl.appendChild(navItemSpecial(ABOUT_ID, "关于 BiliKit-Web"));
   }
   function renderFeedDetail(d) {
     const loggedIn = !!get("feed.accessKey", "");
     d.appendChild(el("div", "detail-title", "App 推荐 Feed"));
-    d.appendChild(el("div", "detail-desc", "首页换成手机 App 的推荐流（需另装 BiliKit Feed 脚本）"));
+    d.appendChild(el("div", "detail-desc", "首页换成手机 App 的推荐流（需另装 BiliKit-Web Feed 脚本）"));
     const onHome = location.pathname === "/" || location.pathname === "/index.html";
     const feedAlive = Number(localStorage.getItem("bilikit:alive.feed") || 0);
     if (onHome && Date.now() - feedAlive > 8e3) {
-      d.appendChild(callout('未检测到 <b>BiliKit Feed</b>，首页推荐流需要它。<a href="https://github.com/shiinayane/BiliKit" target="_blank" rel="noopener">前往安装</a>', "warn"));
+      d.appendChild(callout('未检测到 <b>BiliKit-Web Feed</b>，首页推荐流需要它。<a href="https://github.com/shiinayane/BiliKit-Web" target="_blank" rel="noopener">前往安装</a>', "warn"));
     }
     const fields = el("div", "fields");
     const row = el("div", "field row");
@@ -2480,7 +2480,7 @@
       } else {
         setStatus2("正在拉起二维码…");
         startTvLogin((accessKey) => {
-          if (!set("feed.accessKey", accessKey)) console.error("[BiliKit] access_key 持久化失败：刷新后可能仍为匿名（浏览器隐私模式或存储已满）。");
+          if (!set("feed.accessKey", accessKey)) console.error("[BiliKit-Web] access_key 持久化失败：刷新后可能仍为匿名（浏览器隐私模式或存储已满）。");
         });
       }
     });
@@ -2560,7 +2560,7 @@
     d.appendChild(fields);
   }
   function renderAboutDetail(d) {
-    d.appendChild(el("div", "detail-title", "关于 BiliKit"));
+    d.appendChild(el("div", "detail-title", "关于 BiliKit-Web"));
     d.appendChild(el("div", "detail-desc", "B 站体验增强套件 · Safari 友好、无需扩展、零外部依赖 · 作者 shiinayane · MIT"));
     const fields = el("div", "fields");
     const vrow = el("div", "field row");
@@ -2578,7 +2578,7 @@
     frow.appendChild(fpill);
     fields.appendChild(frow);
     fields.appendChild(callout(
-      '<a href="https://github.com/shiinayane/BiliKit" target="_blank" rel="noopener">GitHub 仓库</a> · <a href="https://github.com/shiinayane/BiliKit/issues" target="_blank" rel="noopener">反馈 / 报 Bug</a> · <a href="https://greasyfork.org/zh-CN/scripts/585248-bilikit-core" target="_blank" rel="noopener">GreasyFork 主页</a>'
+      '<a href="https://github.com/shiinayane/BiliKit-Web" target="_blank" rel="noopener">GitHub 仓库</a> · <a href="https://github.com/shiinayane/BiliKit-Web/issues" target="_blank" rel="noopener">反馈 / 报 Bug</a> · <a href="https://greasyfork.org/zh-CN/scripts/585248-bilikit-core" target="_blank" rel="noopener">GreasyFork 主页</a>'
     ));
     fields.appendChild(callout("<b>开发期 · 快速迭代中</b>：功能可能随时调整，偶有不稳定属正常；B 站接口一变也可能短暂失效。欢迎提 Issue 或建议。", "warn"));
     d.appendChild(fields);
@@ -2642,12 +2642,12 @@
     const sr = root2.attachShadow({ mode: "open" });
     sr.innerHTML = `<style>${STYLE}</style>`;
     const gear = el("div", "gear");
-    gear.title = "BiliKit 设置";
+    gear.title = "BiliKit-Web 设置";
     gear.innerHTML = GEAR_SVG;
     const overlay = el("div", "overlay");
     const card = el("div", "card");
     const head = el("div", "head");
-    head.innerHTML = `<span class="title"><span class="brand">BiliKit</span> 设置</span>`;
+    head.innerHTML = `<span class="title"><span class="brand">BiliKit-Web</span> 设置</span>`;
     const close = el("span", "close", "×");
     head.appendChild(close);
     const main = el("div", "main");
@@ -2689,8 +2689,8 @@
         if (!fab.querySelector(".bk-settings")) {
           const b = document.createElement("button");
           b.className = "bk-settings";
-          b.title = "BiliKit 设置";
-          b.setAttribute("aria-label", "BiliKit 设置");
+          b.title = "BiliKit-Web 设置";
+          b.setAttribute("aria-label", "BiliKit-Web 设置");
           b.innerHTML = FAB_GEAR;
           b.addEventListener("click", open);
           fab.insertBefore(b, fab.querySelector(".bk-refresh"));
@@ -2770,7 +2770,7 @@
     const log = (...a) => {
     };
     if (!TARGET_HOST) {
-      if (configuredHost) console.warn("[BiliKit] CDN 优选已禁用：自定义节点必须是 bilivideo/acgvideo 受信后缀下的纯主机名。");
+      if (configuredHost) console.warn("[BiliKit-Web] CDN 优选已禁用：自定义节点必须是 bilivideo/acgvideo 受信后缀下的纯主机名。");
       return;
     }
     const rewritePlayurl$1 = (root2) => rewritePlayurl(root2, TARGET_HOST, BACKUP_HOSTS);

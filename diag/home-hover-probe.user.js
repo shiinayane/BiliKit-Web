@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         BiliKit · 原生 hover 预览探针（诊断用）
-// @name:en      BiliKit · Native Hover Probe (diagnostic)
-// @namespace    https://github.com/shiinayane/BiliKit
+// @name         BiliKit-Web · 原生 hover 预览探针（诊断用）
+// @name:en      BiliKit-Web · Native Hover Probe (diagnostic)
+// @namespace    https://github.com/shiinayane/BiliKit-Web
 // @version      0.2.0
-// @description  只观测、不改写：抓 B 站原生首页卡片 hover 时发的请求（playurl/view/videoshot）、返回的是 durl(渐进mp4)还是 dash(MSE)、流走哪个主机，以及 <video> 的真实 src。用于搞清原生「秒开真视频」的做法。测时请关掉 BiliKit Feed。
+// @description  只观测、不改写：抓 B 站原生首页卡片 hover 时发的请求（playurl/view/videoshot）、返回的是 durl(渐进mp4)还是 dash(MSE)、流走哪个主机，以及 <video> 的真实 src。用于搞清原生「秒开真视频」的做法。测时请关掉 BiliKit-Web Feed。
 // @author       shiinayane
 // @match        *://www.bilibili.com/
 // @match        *://www.bilibili.com/?*
@@ -136,7 +136,7 @@
   /* ---- 文本报告（规避 Safari console.table 复制成空行） ---- */
   function buildText() {
     const L = [];
-    L.push('===== BiliKit 原生 hover 预览探针 =====');
+    L.push('===== BiliKit-Web 原生 hover 预览探针 =====');
     L.push(`运行 ${t()}s ｜ hover 卡片 ${hoverCount} 次 ｜ Feed ${document.querySelector('.bk-feed-grid') ? '疑似开启(请关掉重测)' : '未检测到✓'}`);
     L.push('\n事件时间线（按发生顺序）：');
     for (const e of events) L.push(`[${e.t}s] ${e.kind.padEnd(16)} ${e.detail}`);

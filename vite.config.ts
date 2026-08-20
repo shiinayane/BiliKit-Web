@@ -3,7 +3,7 @@ import monkey from 'vite-plugin-monkey'
 import { VERSION } from './src/core/version'
 import { ICON } from './icon'
 
-// BiliKit Core：@grant none（页面世界）——所有增强模块 + 统一设置面板打进一个 .user.js。
+// BiliKit-Web Core：@grant none（页面世界）——所有增强模块 + 统一设置面板打进一个 .user.js。
 // 不使用任何 GM_* API，vite-plugin-monkey 会自动输出 `// @grant none`，从而在 Safari
 // Userscripts 下注入页面世界（评论信息/CDN 优选/回程/主题同步等模块读页面 JS 的前提）。
 // App 推荐 feed 需要 GM.xmlHttpRequest（隔离世界），将来单独一个入口/产物，勿并入本包。
@@ -12,8 +12,8 @@ export default defineConfig({
     monkey({
       entry: 'src/entry-core.ts',
       userscript: {
-        name: 'BiliKit Core',
-        namespace: 'https://github.com/shiinayane/BiliKit',
+        name: 'BiliKit-Web Core',
+        namespace: 'https://github.com/shiinayane/BiliKit-Web',
         version: VERSION,
         description: 'B 站体验增强核心，一装到位：CDN 优选（救海外卡顿）· 免登录看评论/动态/1080p · 主题跟随系统深浅 · 评论显性别/IP 属地 · 播放不息屏——统一设置面板集中开关。Safari 友好、无需扩展、零外部依赖。',
         author: 'shiinayane',
@@ -30,6 +30,7 @@ export default defineConfig({
         grant: 'none',
       },
       build: {
+        // 保留既有发布文件名：GreasyFork 同步地址与已安装脚本的更新链依赖这个稳定路径。
         fileName: 'bilikit-core.user.js',
       },
     }),

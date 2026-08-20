@@ -60,7 +60,7 @@ export function saveFeedReturnSession(
     return true
   } catch (error) {
     // 隐私模式 / 配额不足时不阻断导航；只是退化为普通的当前页往返。
-    console.warn('[BiliKit Feed] 保存返回状态失败，将按普通当前页导航：', error)
+    console.warn('[BiliKit-Web Feed] 保存返回状态失败，将按普通当前页导航：', error)
     return false
   }
 }

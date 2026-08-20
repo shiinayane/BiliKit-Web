@@ -24,7 +24,7 @@ async function postSigned(path: string, params: Record<string, string>): Promise
 }
 
 /* ------------------------------------------------------------------ *
- * 浮层 UI（Shadow DOM 隔离，深色卡 + B站粉，跟 BiliKit 一套视觉）
+ * 浮层 UI（Shadow DOM 隔离，深色卡 + B站粉，跟 BiliKit-Web 一套视觉）
  * ------------------------------------------------------------------ */
 let root: HTMLElement | null = null
 let qrImg: HTMLImageElement | null = null
@@ -70,7 +70,7 @@ function openOverlay(): void {
     }
   </style>
   <div class="ov"><div class="card">
-    <div class="title"><b>BiliKit</b> · 登录 App 推荐</div>
+    <div class="title"><b>BiliKit-Web</b> · 登录 App 推荐</div>
     <div class="hint">用手机哔哩哔哩 App 扫码</div>
     <div class="qr"><img alt=""></div>
     <div class="status">正在获取二维码…</div>
