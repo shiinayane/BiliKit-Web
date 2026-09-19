@@ -91,3 +91,64 @@ describe('installNetHook XHR awaitRewrite', () => {
     expect(xhr.sends).toEqual([undefined])
   })
 })
+
+describe('installNetHook fetch awaitRewrite', () => {
+  function setup(rule: NetRule) {
+    const calls: Array<[unknown, RequestInit | undefined]> = []
+    const fakeWindow = { fetch: async (input: unknown, init?: RequestInit) => {
+      calls.push([input, init])
+      return new Response('{}')
+    } }
+    ;(globalThis as any).window = fakeWindow
+    installNetHook([rule])
+    return { calls, fetch: fakeWindow.fetch }
+  }
+
+  it('冷启动等待改写，保留 Request 的调用方覆盖选项', async () => {
+    const d = deferred<{ url: string } | undefined>()
+    const { calls, fetch } = setup({ match: () => true, awaitRewrite: () => d.promise })
+    const controller = new AbortController()
+    const pending = fetch(new Request('https://example.test/original', { credentials: 'include' }), {
+      credentials: 'omit', headers: { 'X-Fixture': 'override' }, signal: controller.signal,
+    })
+    expect(calls).toHaveLength(0)
+    d.resolve({ url: 'https://example.test/upgraded' })
+    await pending
+    expect(calls).toHaveLength(1)
+    expect(calls[0]).toEqual(['https://example.test/upgraded', expect.objectContaining({
+      credentials: 'omit', headers: { 'X-Fixture': 'override' }, signal: controller.signal,
+    })])
+  })
+
+  it.each(['timeout', 'failure'])('%s 后只发送一次原请求', async (mode) => {
+    const d = deferred<{ url: string } | undefined>()
+    const { calls, fetch } = setup({ match: () => true, awaitRewrite: () => d.promise })
+    const pending = fetch('/original')
+    if (mode === 'timeout') d.resolve(undefined)
+    else d.reject(new Error('unavailable'))
+    await pending
+    expect(calls).toEqual([['/original', undefined]])
+  })
+
+  it('等待期间取消立即拒绝，迟到的改写不会发请求', async () => {
+    const d = deferred<{ url: string } | undefined>()
+    const { calls, fetch } = setup({ match: () => true, awaitRewrite: () => d.promise })
+    const controller = new AbortController()
+    const pending = fetch(new Request('https://example.test/original', { signal: controller.signal }))
+    controller.abort()
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+    d.resolve({ url: '/late' })
+    await flush()
+    expect(calls).toHaveLength(0)
+  })
+
+  it('已有签名与未命中的请求不等待', async () => {
+    let waits = 0
+    const { calls, fetch } = setup({ match: (url) => url === '/matched',
+      rewriteRequest: () => ({ url: '/ready' }), awaitRewrite: async () => { waits++; return undefined } })
+    await fetch('/matched')
+    await fetch('/other')
+    expect(waits).toBe(0)
+    expect(calls.map(([url]) => url)).toEqual(['/ready', '/other'])
+  })
+})

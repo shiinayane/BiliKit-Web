@@ -26,23 +26,36 @@ function isVideoUrl(u: string): boolean {
 }
 
 // 从点击目标解析出「要打开的视频 URL(+可选封面)」；非视频 / 需放行 → null
-function resolve(target: HTMLElement): { url: string; cover: string } | null {
+export function resolveVideoClick(target: Element): { url: string; cover: string } | null {
   // Feed 卡片上的操作控件（稍后再看 / 我不想看菜单 / 撤销浮层）统一带 .bk-feed-noopen——放行、别当成「点视频」
   if (target.closest('.bk-feed-noopen')) return null
   const pick = (root: Element, url: string) => {
     const img = root.querySelector('img') as HTMLImageElement | null
     return { url, cover: (img && (img.currentSrc || img.src)) || '' }
   }
-  // 1) 原生 <a> 视频链接 → 接管。非视频 <a>（UP 空间/分区/合集…）不在此 return，继续看是否落在 data-bvid 卡片上
-  //    （兜住「非视频 anchor 包着 data-bvid 卡片」的边角；当前标记结构不会触发，但更稳）
+  // 原生链接优先；明确的非视频链接保持原生导航。
   const a = target.closest('a[href]') as HTMLAnchorElement | null
-  if (a && isVideoUrl(a.href)) return pick(a, a.href.split('#')[0])
+  if (a) return isVideoUrl(a.href) ? pick(a, a.href.split('#')[0]) : null
   // 2) Feed 卡片（div[data-bvid]）：排除头像 / UP 名区域（那些交给 Feed 自己进空间）
   const card = target.closest('[data-bvid]') as HTMLElement | null
   if (card && card.dataset.bvid && !target.closest('.bk-feed-face, .bk-feed-up')) {
     return pick(card, `https://www.bilibili.com/video/${card.dataset.bvid}`)
   }
-  return null
+  // 原生首页/热门卡片的标题可能只有站点点击处理器，没有自身 href。
+  // 仅从明确的标题区域回溯到最近的视频卡片，复用该卡片唯一的视频目的地。
+  // 不把整张卡片的空白、UP 信息或按钮都变成视频入口；多目的地时保守放行。
+  if (target.closest('button, input, textarea, select, [role="button"], [contenteditable="true"]')) return null
+  const title = target.closest('.bili-video-card__info--tit, .video-name, .video-title, .title')
+  const nativeCard = title?.closest('.bili-video-card, .video-card')
+  if (!nativeCard) return null
+  const links = Array.from(nativeCard.querySelectorAll<HTMLAnchorElement>('a[href]'))
+    .filter((link) => isVideoUrl(link.href))
+  const destinations = new Set(links.map((link) => {
+    const url = new URL(link.href, location.href)
+    return `${url.origin}${url.pathname.replace(/\/$/, '')}`
+  }))
+  if (destinations.size !== 1) return null
+  return pick(nativeCard, links[0]!.href.split('#')[0])
 }
 
 export function installSiteDrawer(): void {
@@ -58,7 +71,8 @@ export function installSiteDrawer(): void {
     if (mode === 'current') return // 当前页 = 原生行为，不拦
     // 修饰键 / 中键 / 已被处理 → 放行（用户想要新标签 / 站点已接管）
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
-    const hit = resolve(e.target as HTMLElement)
+    const target = e.target instanceof Element ? e.target : null
+    const hit = target ? resolveVideoClick(target) : null
     if (!hit) return
     e.preventDefault()
     e.stopImmediatePropagation() // 抢在站点 SPA 路由之前完全接管这次点击，避免底层又导航一遍
@@ -78,6 +92,6 @@ export function installSiteDrawer(): void {
     if (isPlayPage()) return // 播放页不接管 → 预连接纯属浪费
     const mode = get<string>('feed.openMode', DEFAULT_OPEN_MODE)
     if (mode !== 'drawer' && mode !== 'drawer-web') return
-    if (resolve(e.target as HTMLElement)) preconnect()
+    if (e.target instanceof Element && resolveVideoClick(e.target)) preconnect()
   }, true)
 }

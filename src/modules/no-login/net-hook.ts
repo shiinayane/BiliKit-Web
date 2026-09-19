@@ -15,8 +15,8 @@ export interface NetRule {
   /** 改请求：返回新 url / credentials（都可选，不返回则不改） */
   rewriteRequest?: (url: string) => { url?: string; credentials?: RequestCredentials } | undefined
   /**
-   * 异步改请求（仅 XHR 路支持）：当同步 rewriteRequest 没拿到新 url（如 playurl 的 wbi key 还没暖好）时，
-   * send() 会**推迟真正发送**、await 本函数拿到最终改写再发。拿不到（返回 undefined/超时）则按原始请求发出。
+   * 异步改请求（fetch / XHR）：当同步 rewriteRequest 没拿到新 url（如 playurl 的 wbi key 还没暖好）时，
+   * 请求会**推迟真正发送**、await 本函数拿到最终改写再发。拿不到（返回 undefined/超时）则按原始请求发出。
    * 用于「无痕会话首个视频 key 未就绪 → 首帧 480p」这类竞态：等 key 到了再签名，首个视频也能 1080p。
    */
   awaitRewrite?: (url: string) => Promise<{ url?: string; credentials?: RequestCredentials } | undefined>
@@ -52,7 +52,27 @@ export function installNetHook(rules: NetRule[]): void {
 
       let realInput: any = input
       let realInit: any = init
-      const rw = rule.rewriteRequest?.(url)
+      const signal: AbortSignal | undefined = init?.signal !== undefined
+        ? init.signal : (input instanceof Request ? input.signal : undefined)
+      if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError')
+      let rw = rule.rewriteRequest?.(url)
+      if (!rw?.url && rule.awaitRewrite) {
+        // 与 XHR 共用规则的有界等待；取消时立刻结束，迟到的签名不得再发请求。
+        let onAbort: (() => void) | undefined
+        try {
+          const cancelled = new Promise<never>((_resolve, reject) => {
+            onAbort = () => reject(signal?.reason ?? new DOMException('Aborted', 'AbortError'))
+            signal?.addEventListener('abort', onAbort, { once: true })
+          })
+          rw = await Promise.race([rule.awaitRewrite(url), cancelled]) ?? rw
+        } catch {
+          if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError')
+          // 签名失败或规则超时：保留原请求，仍可正常播放。
+        } finally {
+          if (onAbort) signal?.removeEventListener('abort', onAbort)
+        }
+      }
+      if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError')
       if (rw && (rw.url || rw.credentials)) {
         if (input instanceof Request && !rw.url) {
           // 仅改 credentials（如 reply 走匿名）：用 Request 克隆构造，headers/body/signal/mode 原样保留、只覆盖 credentials
@@ -60,7 +80,7 @@ export function installNetHook(rules: NetRule[]): void {
           realInit = init
         } else {
           // 改了 url：归一成字符串 url + init（Request 的 body 仅 GET 接口，按设计不搬）
-          const base = input instanceof Request ? requestToInit(input) : (init || {})
+          const base = input instanceof Request ? { ...requestToInit(input), ...init } : (init || {})
           realInput = rw.url || url
           realInit = { ...base, ...(rw.credentials ? { credentials: rw.credentials } : {}) }
         }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliKit-Web Core
 // @namespace    https://github.com/shiinayane/BiliKit-Web
-// @version      0.5.33
+// @version      0.5.34
 // @author       shiinayane
 // @description  B 站体验增强核心，一装到位：CDN 优选（救海外卡顿）· 免登录看评论/动态/1080p · 主题跟随系统深浅 · 评论显性别/IP 属地 · 播放不息屏——统一设置面板集中开关。Safari 友好、无需扩展、零外部依赖。
 // @license      MIT
@@ -2052,7 +2052,7 @@
       }
     })();
   }
-  const VERSION = "0.5.33";
+  const VERSION = "0.5.34";
   const DEFAULT_OPEN_MODE = "newtab";
   const NEW_TAB_HISTORY_FLATTEN_KEY = "feed.newTabHistoryFlatten";
   const DEFAULT_NEW_TAB_HISTORY_FLATTEN = false;
@@ -3340,13 +3340,30 @@
         if (!rule) return origFetch.apply(this, arguments);
         let realInput = input;
         let realInit = init2;
-        const rw = (_a = rule.rewriteRequest) == null ? void 0 : _a.call(rule, url);
+        const signal = (init2 == null ? void 0 : init2.signal) !== void 0 ? init2.signal : input instanceof Request ? input.signal : void 0;
+        if (signal == null ? void 0 : signal.aborted) throw signal.reason ?? new DOMException("Aborted", "AbortError");
+        let rw = (_a = rule.rewriteRequest) == null ? void 0 : _a.call(rule, url);
+        if (!(rw == null ? void 0 : rw.url) && rule.awaitRewrite) {
+          let onAbort;
+          try {
+            const cancelled = new Promise((_resolve, reject) => {
+              onAbort = () => reject((signal == null ? void 0 : signal.reason) ?? new DOMException("Aborted", "AbortError"));
+              signal == null ? void 0 : signal.addEventListener("abort", onAbort, { once: true });
+            });
+            rw = await Promise.race([rule.awaitRewrite(url), cancelled]) ?? rw;
+          } catch {
+            if (signal == null ? void 0 : signal.aborted) throw signal.reason ?? new DOMException("Aborted", "AbortError");
+          } finally {
+            if (onAbort) signal == null ? void 0 : signal.removeEventListener("abort", onAbort);
+          }
+        }
+        if (signal == null ? void 0 : signal.aborted) throw signal.reason ?? new DOMException("Aborted", "AbortError");
         if (rw && (rw.url || rw.credentials)) {
           if (input instanceof Request && !rw.url) {
             realInput = new Request(input, rw.credentials ? { credentials: rw.credentials } : {});
             realInit = init2;
           } else {
-            const base = input instanceof Request ? requestToInit(input) : init2 || {};
+            const base = input instanceof Request ? { ...requestToInit(input), ...init2 } : init2 || {};
             realInput = rw.url || url;
             realInit = { ...base, ...rw.credentials ? { credentials: rw.credentials } : {} };
           }
@@ -3671,10 +3688,10 @@
       if (!response.ok) return "unknown";
       return loginStatusFromNav(await response.json());
     }).catch(() => "unknown");
-    const timeout = new Promise((resolve2) => {
+    const timeout = new Promise((resolve) => {
       timer = setTimeout(() => {
         controller.abort();
-        resolve2("unknown");
+        resolve("unknown");
       }, timeoutMs);
     });
     try {
@@ -5274,19 +5291,29 @@
       return false;
     }
   }
-  function resolve(target) {
+  function resolveVideoClick(target) {
     if (target.closest(".bk-feed-noopen")) return null;
     const pick = (root2, url) => {
       const img = root2.querySelector("img");
       return { url, cover: img && (img.currentSrc || img.src) || "" };
     };
     const a = target.closest("a[href]");
-    if (a && isVideoUrl(a.href)) return pick(a, a.href.split("#")[0]);
+    if (a) return isVideoUrl(a.href) ? pick(a, a.href.split("#")[0]) : null;
     const card = target.closest("[data-bvid]");
     if (card && card.dataset.bvid && !target.closest(".bk-feed-face, .bk-feed-up")) {
       return pick(card, `https://www.bilibili.com/video/${card.dataset.bvid}`);
     }
-    return null;
+    if (target.closest('button, input, textarea, select, [role="button"], [contenteditable="true"]')) return null;
+    const title = target.closest(".bili-video-card__info--tit, .video-name, .video-title, .title");
+    const nativeCard = title == null ? void 0 : title.closest(".bili-video-card, .video-card");
+    if (!nativeCard) return null;
+    const links = Array.from(nativeCard.querySelectorAll("a[href]")).filter((link) => isVideoUrl(link.href));
+    const destinations = new Set(links.map((link) => {
+      const url = new URL(link.href, location.href);
+      return `${url.origin}${url.pathname.replace(/\/$/, "")}`;
+    }));
+    if (destinations.size !== 1) return null;
+    return pick(nativeCard, links[0].href.split("#")[0]);
   }
   function installSiteDrawer() {
     if (window.__BILIKIT_SITE_DRAWER__) return;
@@ -5297,7 +5324,8 @@
       const mode = get("feed.openMode", DEFAULT_OPEN_MODE);
       if (mode === "current") return;
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const hit = resolve(e.target);
+      const target = e.target instanceof Element ? e.target : null;
+      const hit = target ? resolveVideoClick(target) : null;
       if (!hit) return;
       e.preventDefault();
       e.stopImmediatePropagation();
@@ -5315,7 +5343,7 @@
       if (isPlayPage()) return;
       const mode = get("feed.openMode", DEFAULT_OPEN_MODE);
       if (mode !== "drawer" && mode !== "drawer-web") return;
-      if (resolve(e.target)) preconnect();
+      if (e.target instanceof Element && resolveVideoClick(e.target)) preconnect();
     }, true);
   }
   const drawerFrame = window.top !== window.self ? readDrawerFrameName(window.name) : null;
