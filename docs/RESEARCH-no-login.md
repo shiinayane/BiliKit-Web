@@ -25,7 +25,7 @@
 |---|---|---|
 | 全站「已登录」假象 | 伪造 `DedeUserID=<随机>; domain=.bilibili.com` cookie | `document.cookie` |
 | 登录态 UI + 动态可见 | nav 响应里把登录字段填成已登录（**保留 `wbi_img` 不动**） | `/x/web-interface/nav` |
-| 看评论（含子评论） | 请求改 `credentials:'omit'` 走匿名（假 cookie 会被拒，去掉反而正常返公开评论） | `/x/v2/reply/wbi/main`、`/x/v2/reply/reply` |
+| 看评论（含子评论） | 请求改 `credentials:'omit'` 走匿名（假 cookie 会被拒，去掉反而正常返公开评论）；子评论再删 `x-bili-device-req-json`，否则匿名只给第 1 页 | `/x/v2/reply/wbi/main`、`/x/v2/reply/reply` |
 | 1080p 取流 | query 塞 `qn=80` + `try_look=1`（官方试看），去掉旧 `w_rid/wts`，**重新 wbi 签名** | `/x/player/wbi/playurl` |
 | 播放器 UI 认账（清晰度/字幕可选） | 响应里改 `login_mid`=随机、`need_login_subtitle`=false、`current_level`=6 | `/x/player/wbi/v2` |
 | 逼播放器重新取流 | 清空页面预埋的低清 `window.__playinfo__`（置 null）+ 注入空 `playurlSSRData` | document-start |

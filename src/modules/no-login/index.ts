@@ -3,6 +3,7 @@ import { setModuleEnabled, get, set } from '../../core/settings'
 import { installNetHook, type NetRule } from './net-hook'
 import { signQuery, warmKeys, ensureKeys } from './wbi-core'
 import { playurlParams } from './playurl'
+import { stripReplyDeviceParam } from './reply'
 import {
   initialAuthAction,
   loginCookieFingerprint,
@@ -185,9 +186,13 @@ function init(_cfg: Cfg): void {
       },
     },
     // reply：匿名请求（假 cookie 会被拒，去掉反而正常返公开评论）→ 视频/动态下方评论
+    // 子评论另去掉 x-bili-device-req-json，否则匿名只给第 1 页、翻页失效（同 beefreely v3.0.1）
     {
       match: (u) => u.includes('/x/v2/reply/wbi/main') || u.includes('/x/v2/reply/reply'),
-      rewriteRequest: () => ({ credentials: 'omit' }),
+      rewriteRequest: (u) => ({
+        url: u.includes('/x/v2/reply/reply') ? stripReplyDeviceParam(u) : undefined,
+        credentials: 'omit',
+      }),
     },
     // player/wbi/v2：改 login_mid / 等级 / 字幕字段 → 播放器 UI 认账（清晰度、字幕可选）
     {

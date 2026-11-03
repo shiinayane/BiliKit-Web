@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliKit-Web Core
 // @namespace    https://github.com/shiinayane/BiliKit-Web
-// @version      0.5.34
+// @version      0.5.35
 // @author       shiinayane
 // @description  B 站体验增强核心，一装到位：CDN 优选（救海外卡顿）· 免登录看评论/动态/1080p · 主题跟随系统深浅 · 评论显性别/IP 属地 · 播放不息屏——统一设置面板集中开关。Safari 友好、无需扩展、零外部依赖。
 // @license      MIT
@@ -2052,7 +2052,7 @@
       }
     })();
   }
-  const VERSION = "0.5.34";
+  const VERSION = "0.5.35";
   const DEFAULT_OPEN_MODE = "newtab";
   const NEW_TAB_HISTORY_FLATTEN_KEY = "feed.newTabHistoryFlatten";
   const DEFAULT_NEW_TAB_HISTORY_FLATTEN = false;
@@ -3637,6 +3637,15 @@
     params.fourk = "1";
     return { base, params };
   }
+  function stripReplyDeviceParam(url) {
+    const i = url.indexOf("?");
+    if (i < 0) return void 0;
+    const params = new URLSearchParams(url.slice(i + 1));
+    if (!params.has("x-bili-device-req-json")) return void 0;
+    params.delete("x-bili-device-req-json");
+    const qs = params.toString();
+    return qs ? `${url.slice(0, i)}?${qs}` : url.slice(0, i);
+  }
   const AUTH_CACHE_KEY = "bilikit:no-login-auth";
   const VALID_TTL_MS = 5 * 60 * 1e3;
   function cookieValue(cookie, name) {
@@ -3893,9 +3902,13 @@
         }
       },
       // reply：匿名请求（假 cookie 会被拒，去掉反而正常返公开评论）→ 视频/动态下方评论
+      // 子评论另去掉 x-bili-device-req-json，否则匿名只给第 1 页、翻页失效（同 beefreely v3.0.1）
       {
         match: (u) => u.includes("/x/v2/reply/wbi/main") || u.includes("/x/v2/reply/reply"),
-        rewriteRequest: () => ({ credentials: "omit" })
+        rewriteRequest: (u) => ({
+          url: u.includes("/x/v2/reply/reply") ? stripReplyDeviceParam(u) : void 0,
+          credentials: "omit"
+        })
       },
       // player/wbi/v2：改 login_mid / 等级 / 字幕字段 → 播放器 UI 认账（清晰度、字幕可选）
       {
